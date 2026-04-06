@@ -38,9 +38,9 @@ Desktop.ini
 *.swo
 *~
 
-# Logs
+# Logs (runtime, not source)
 *.log
-logs/
+/logs/
 
 # Tauri
 WixTools/

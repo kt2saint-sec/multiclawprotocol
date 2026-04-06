@@ -12,6 +12,7 @@ const PAGES = [
   { id: "canvas", label: "Pipeline" },
   { id: "network", label: "3D Map" },
   { id: "terminal", label: "Terminal" },
+  { id: "logs", label: "Logs" },
   { id: "settings", label: "Settings" },
 ];
 

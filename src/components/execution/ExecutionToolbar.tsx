@@ -1,5 +1,9 @@
 import { useCallback } from "react";
-import { useExecutionStore, type RunStatus } from "../../stores/executionStore";
+import {
+  useExecutionStore,
+  type RunStatus,
+  type AutonomyMode,
+} from "../../stores/executionStore";
 import { useFlowStore } from "../../stores/flowStore";
 import { usePipelineStore } from "../../stores/pipelineStore";
 
@@ -146,6 +150,39 @@ export function ExecutionToolbar() {
       <span className={`text-caption ${statusInfo.color} ml-1`}>
         {statusInfo.label}
       </span>
+
+      {/* Autonomy mode selector */}
+      <div className="w-px h-5 bg-gray-700/50 mx-1" />
+      <AutonomySelector />
+    </div>
+  );
+}
+
+const AUTONOMY_MODES: { id: AutonomyMode; label: string; title: string }[] = [
+  { id: "manual", label: "Manual", title: "Approve every step" },
+  { id: "auto", label: "Auto", title: "Run to completion" },
+  { id: "checkpoint", label: "Ckpt", title: "Save checkpoint after each node" },
+];
+
+function AutonomySelector() {
+  const { autonomyMode, setAutonomyMode } = useExecutionStore();
+
+  return (
+    <div className="flex items-center gap-0.5 bg-[#0F1117] rounded-pill p-0.5">
+      {AUTONOMY_MODES.map((m) => (
+        <button
+          key={m.id}
+          onClick={() => setAutonomyMode(m.id)}
+          title={m.title}
+          className={`px-2 py-1 text-[0.6rem] font-medium rounded-pill transition-all ${
+            autonomyMode === m.id
+              ? "bg-red-600 text-white"
+              : "text-gray-500 hover:text-gray-300"
+          }`}
+        >
+          {m.label}
+        </button>
+      ))}
     </div>
   );
 }
