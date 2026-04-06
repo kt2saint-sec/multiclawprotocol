@@ -1,5 +1,6 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { useAgentRegistryStore } from "../../stores/agentRegistryStore";
+import { useFlowStore } from "../../stores/flowStore";
 
 const TEAM_COLORS: Record<string, string> = {
   blue: "#1B3A6B",
@@ -143,12 +144,34 @@ export function NetworkGraph3D() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const agentsMap = useAgentRegistryStore((s) => s.agents);
   const agents = Object.values(agentsMap);
+  const flowEdges = useFlowStore((s) => s.edges);
+  const flowNodes = useFlowStore((s) => s.nodes);
   const [rotation, setRotation] = useState({ rx: 0.3, ry: 0 });
   const [zoom, setZoom] = useState(1);
   const [dragging, setDragging] = useState(false);
   const [lastMouse, setLastMouse] = useState({ x: 0, y: 0 });
   const nodesRef = useRef<NodePosition[]>([]);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+
+  // Derive connections from user's pipeline, empty if none configured
+  const connections: [string, string][] = useMemo(() => {
+    if (flowEdges.length > 0 && flowNodes.length > 0) {
+      const nodeIdToAgentId = new Map<string, string>();
+      for (const n of flowNodes) {
+        const agentId = (n.data as { manifest?: { id?: string } })?.manifest
+          ?.id;
+        if (agentId) nodeIdToAgentId.set(n.id, agentId);
+      }
+      return flowEdges
+        .map((e) => {
+          const src = nodeIdToAgentId.get(e.source);
+          const tgt = nodeIdToAgentId.get(e.target);
+          return src && tgt ? ([src, tgt] as [string, string]) : null;
+        })
+        .filter((e): e is [string, string] => e !== null);
+    }
+    return [];
+  }, [flowEdges, flowNodes]);
 
   // Initialize nodes once agents are loaded
   useEffect(() => {
@@ -192,7 +215,7 @@ export function NetworkGraph3D() {
       }
 
       // Apply physics
-      applyForces(nodesRef.current, CONNECTIONS);
+      applyForces(nodesRef.current, connections);
 
       const cosRx = Math.cos(rotation.rx);
       const sinRx = Math.sin(rotation.rx);
@@ -219,7 +242,7 @@ export function NetworkGraph3D() {
       const nodeMap = new Map(nodesRef.current.map((n) => [n.id, n]));
 
       // Draw edges
-      for (const [srcId, tgtId] of CONNECTIONS) {
+      for (const [srcId, tgtId] of connections) {
         const src = nodeMap.get(srcId);
         const tgt = nodeMap.get(tgtId);
         if (!src || !tgt) continue;

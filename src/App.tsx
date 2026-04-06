@@ -82,12 +82,11 @@ export default function App() {
           {currentPage === "canvas" && (
             <AppLayout
               palette={
-                <div className="flex items-center gap-2">
-                  {/* Execution controls — bottom left, same-size buttons */}
+                <div className="flex items-start gap-2 py-2">
                   <div className="flex-none px-3">
                     <ExecutionToolbar />
                   </div>
-                  <div className="w-px h-6 bg-gray-700/50 flex-none" />
+                  <div className="w-px self-stretch bg-[#898F9C] dark:bg-gray-700/50 flex-none" />
                   <AgentPalette />
                 </div>
               }

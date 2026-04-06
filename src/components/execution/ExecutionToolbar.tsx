@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import {
   useExecutionStore,
   type RunStatus,
@@ -7,7 +7,6 @@ import {
 import { useFlowStore } from "../../stores/flowStore";
 import { usePipelineStore } from "../../stores/pipelineStore";
 
-// Tauri invoke — no-op outside Tauri
 async function tauriInvoke(
   cmd: string,
   args?: Record<string, unknown>,
@@ -40,9 +39,7 @@ export function ExecutionToolbar() {
 
   const handleRun = useCallback(async () => {
     if (!canRun || nodes.length === 0) return;
-
     const budget = pipeline?.budget ?? { max_cost_usd: 2.0, warn_at_usd: 1.5 };
-
     const request = {
       pipeline_id: pipeline?.id ?? crypto.randomUUID(),
       nodes: nodes.map((n) => ({
@@ -57,7 +54,6 @@ export function ExecutionToolbar() {
       max_parallel: pipeline?.execution_config?.max_parallel_nodes ?? 2,
       on_budget_exceeded: "pause_and_notify",
     };
-
     try {
       const runId = (await tauriInvoke("start_run", { request })) as
         | string
@@ -99,61 +95,50 @@ export function ExecutionToolbar() {
   }, [canStop]);
 
   const statusInfo = STATUS_CONFIG[status];
-
   const btnBase =
-    "w-20 py-1.5 text-caption font-medium rounded-pill text-center transition-all disabled:opacity-30 disabled:cursor-not-allowed";
+    "w-full py-1 text-[0.65rem] font-medium rounded-pill text-center transition-all disabled:opacity-30 disabled:cursor-not-allowed";
 
   return (
-    <div className="flex items-center gap-1.5">
-      {/* Run — green */}
-      <button
-        onClick={handleRun}
-        disabled={!canRun || nodes.length === 0}
-        className={`${btnBase} bg-[#166534] text-white hover:bg-[#15803d]`}
-        title={
-          nodes.length === 0 ? "Add agents to the canvas first" : "Run pipeline"
-        }
-      >
-        {status === "running" ? "⟳ Run" : "▶ Run"}
-      </button>
-
-      {/* Pause — orange */}
-      {status === "paused" ? (
+    <div className="flex gap-2 items-center">
+      <div className="flex flex-col gap-1 w-[84px]">
         <button
-          onClick={handleResume}
+          onClick={handleRun}
+          disabled={!canRun || nodes.length === 0}
           className={`${btnBase} bg-[#166534] text-white hover:bg-[#15803d]`}
-          title="Resume execution"
+          title={nodes.length === 0 ? "Add agents first" : "Run pipeline"}
         >
-          ▶ Resume
+          {status === "running" ? "⟳ Run" : "▶ Run"}
         </button>
-      ) : (
+        {status === "paused" ? (
+          <button
+            onClick={handleResume}
+            className={`${btnBase} bg-[#166534] text-white hover:bg-[#15803d]`}
+            title="Resume"
+          >
+            ▶ Resume
+          </button>
+        ) : (
+          <button
+            onClick={handlePause}
+            disabled={!canPause}
+            className={`${btnBase} bg-[#92400e] text-white hover:bg-[#b45309]`}
+            title="Pause"
+          >
+            ⏸ Pause
+          </button>
+        )}
         <button
-          onClick={handlePause}
-          disabled={!canPause}
-          className={`${btnBase} bg-[#92400e] text-white hover:bg-[#b45309]`}
-          title="Pause execution"
+          onClick={handleStop}
+          disabled={!canStop}
+          className={`${btnBase} bg-[#991b1b] text-white hover:bg-[#dc2626]`}
+          title="Stop"
         >
-          ⏸ Pause
+          ◼ Stop
         </button>
-      )}
-
-      {/* Stop — red */}
-      <button
-        onClick={handleStop}
-        disabled={!canStop}
-        className={`${btnBase} bg-[#991b1b] text-white hover:bg-[#dc2626]`}
-        title="Stop execution"
-      >
-        ◼ Stop
-      </button>
-
-      <span className={`text-caption ${statusInfo.color} ml-1`}>
-        {statusInfo.label}
-      </span>
-
-      {/* Autonomy mode selector */}
-      <div className="w-px h-5 bg-gray-700/50 mx-1" />
-      <AutonomySelector />
+      </div>
+      <div className="flex flex-col gap-1 w-[84px]">
+        <AutonomySelector />
+      </div>
     </div>
   );
 }
@@ -161,28 +146,73 @@ export function ExecutionToolbar() {
 const AUTONOMY_MODES: { id: AutonomyMode; label: string; title: string }[] = [
   { id: "manual", label: "Manual", title: "Approve every step" },
   { id: "auto", label: "Auto", title: "Run to completion" },
-  { id: "checkpoint", label: "Ckpt", title: "Save checkpoint after each node" },
+  {
+    id: "checkpoint",
+    label: "Checkpoint",
+    title: "Save checkpoint after each node",
+  },
 ];
 
 function AutonomySelector() {
   const { autonomyMode, setAutonomyMode } = useExecutionStore();
+  const [showInfo, setShowInfo] = useState(false);
+
+  const handleSelect = (id: AutonomyMode) => {
+    setAutonomyMode(id);
+    setShowInfo(id === "manual");
+  };
 
   return (
-    <div className="flex items-center gap-0.5 bg-[#0F1117] rounded-pill p-0.5">
+    <div className="relative flex flex-col gap-1 w-full">
       {AUTONOMY_MODES.map((m) => (
         <button
           key={m.id}
-          onClick={() => setAutonomyMode(m.id)}
+          onClick={() => handleSelect(m.id)}
           title={m.title}
-          className={`px-2 py-1 text-[0.6rem] font-medium rounded-pill transition-all ${
-            autonomyMode === m.id
-              ? "bg-red-600 text-white"
-              : "text-gray-500 hover:text-gray-300"
-          }`}
+          className={`w-full py-1 text-[0.65rem] font-medium rounded-pill text-center transition-all ${autonomyMode === m.id ? "bg-[#1B3A6B] text-white" : "border border-gray-700/50 text-gray-500 hover:text-gray-300 hover:border-gray-500"}`}
         >
           {m.label}
         </button>
       ))}
+
+      {showInfo && autonomyMode === "manual" && (
+        <div className="absolute left-full top-0 ml-2 w-[260px] bg-[#1A1C24] border border-gray-700/50 rounded-node p-3 shadow-lg z-50">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[0.7rem] font-bold text-white">
+              Manual Mode
+            </span>
+            <button
+              onClick={() => setShowInfo(false)}
+              className="text-gray-500 hover:text-white text-caption"
+            >
+              x
+            </button>
+          </div>
+          <p className="text-[0.65rem] text-gray-300 leading-relaxed mb-2">
+            Pipeline pauses after each agent. You review output and choose how
+            to continue:
+          </p>
+          <div className="space-y-1.5 text-[0.6rem]">
+            <div className="flex gap-2">
+              <span className="text-[#4ade80] font-bold flex-none">
+                Pass context
+              </span>
+              <span className="text-gray-400">
+                Full output forwarded. Better for complex tasks, costs more
+                tokens.
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-[#7dd3fc] font-bold flex-none">
+                Fresh start
+              </span>
+              <span className="text-gray-400">
+                You write the prompt. Better for cheap local models.
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

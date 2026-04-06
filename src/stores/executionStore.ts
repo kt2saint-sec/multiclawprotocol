@@ -75,7 +75,7 @@ export interface ExecutionState {
 const initialState = {
   runId: null as string | null,
   status: "idle" as RunStatus,
-  autonomyMode: "checkpoint" as AutonomyMode,
+  autonomyMode: "auto" as AutonomyMode,
   nodeStates: {} as Record<string, NodeRunState>,
   totalCostUsd: 0,
   budgetReservedUsd: 0,
