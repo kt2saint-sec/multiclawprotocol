@@ -8,9 +8,9 @@ interface AppLayoutProps {
 }
 
 /**
- * Root CSS Grid layout shell.
- * Columns: 240px (palette) | flex-1 (canvas) | 320px (inspector)
- * Rows:    1fr (main content) | auto (status bar)
+ * Root layout shell.
+ * Top: canvas (flex) | inspector (320px)
+ * Bottom: horizontal agent palette strip + status bar
  */
 export const AppLayout: React.FC<AppLayoutProps> = ({
   palette,
@@ -19,23 +19,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   statusBar,
 }) => {
   return (
-    <div className="h-screen w-screen overflow-hidden bg-surface-primary dark:bg-dark-surface-primary text-surface-accent dark:text-gray-200 grid grid-rows-[1fr_auto]">
-      {/* Main 3-column area */}
-      <div
-        className="grid overflow-hidden min-h-0"
-        style={{ gridTemplateColumns: "240px 1fr 320px" }}
-      >
-        {/* Left sidebar — Agent Palette */}
-        <aside
-          className="h-full overflow-y-auto border-r border-gray-200 dark:border-gray-700 bg-surface-secondary dark:bg-dark-surface-secondary flex flex-col"
-          aria-label="Agent palette"
-        >
-          {palette}
-        </aside>
-
-        {/* Center — Pipeline Canvas */}
+    <div className="h-screen w-screen overflow-hidden bg-surface-primary dark:bg-dark-surface-primary text-surface-accent dark:text-gray-200 flex flex-col">
+      {/* Top area: canvas + inspector side by side */}
+      <div className="flex-1 flex min-h-0">
+        {/* Canvas — fills available space */}
         <main
-          className="h-full overflow-hidden relative bg-surface-primary dark:bg-dark-surface-primary"
+          className="flex-1 overflow-hidden relative bg-surface-primary dark:bg-dark-surface-primary"
           aria-label="Pipeline canvas"
         >
           {canvas}
@@ -43,15 +32,23 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 
         {/* Right sidebar — Inspector Panel */}
         <aside
-          className="h-full overflow-y-auto border-l border-gray-200 dark:border-gray-700 bg-surface-secondary dark:bg-dark-surface-secondary flex flex-col"
+          className="w-[320px] flex-none h-full overflow-y-auto border-l border-gray-200 dark:border-gray-700 bg-surface-secondary dark:bg-dark-surface-secondary flex flex-col"
           aria-label="Inspector panel"
         >
           {inspector}
         </aside>
       </div>
 
-      {/* Bottom status bar */}
-      <footer className="border-t border-gray-200 dark:border-gray-700 bg-surface-secondary dark:bg-dark-surface-secondary">
+      {/* Bottom: Agent palette strip */}
+      <div
+        className="flex-none border-t border-gray-200 dark:border-gray-700 bg-surface-secondary dark:bg-dark-surface-secondary"
+        aria-label="Agent palette"
+      >
+        {palette}
+      </div>
+
+      {/* Status bar */}
+      <footer className="flex-none border-t border-gray-200 dark:border-gray-700 bg-surface-secondary dark:bg-dark-surface-secondary">
         {statusBar}
       </footer>
     </div>

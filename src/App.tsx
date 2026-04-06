@@ -35,8 +35,8 @@ export default function App() {
       <ReactFlowProvider>
         <AppLayout
           palette={
-            <div className="flex flex-col h-full">
-              <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center gap-2">
+              <div className="flex-none flex items-center gap-2 px-3">
                 <h2 className="text-caption font-bold tracking-widest text-surface-accent dark:text-gray-300">
                   AGENTS
                 </h2>

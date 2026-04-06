@@ -144,9 +144,8 @@ export function DraggableAgentCard({ manifest }: DraggableAgentCardProps) {
       style={cardVars}
       className={[
         // ── Card shell ──────────────────────────────────────────────────────
-        // Fixed width fills the 240px palette column with 8px padding each side.
-        // min-h keeps every card the same height so the grid is uniform.
-        "relative flex flex-col w-full min-h-[148px]",
+        // Compact card for horizontal bottom strip layout.
+        "relative flex flex-col w-[140px] flex-none min-h-[90px]",
         "rounded-node overflow-hidden",
         "cursor-grab active:cursor-grabbing select-none",
 
@@ -179,63 +178,16 @@ export function DraggableAgentCard({ manifest }: DraggableAgentCardProps) {
       />
 
       {/* ── Card face ────────────────────────────────────────────────────── */}
-      <div className="flex flex-col flex-1 p-2.5 gap-2">
-        {/* Row 1: Icon orb + name + type badge */}
-        <div className="flex items-center gap-2">
-          {/* Icon orb — colored circle with glyph, team dim background */}
-          <div
-            className={[
-              "flex-none flex items-center justify-center",
-              "w-9 h-9 rounded-node", // 36px, node radius
-              "font-mono font-bold text-caption",
-              // Inner ring using box-shadow (no extra DOM element)
-              "ring-1",
-            ].join(" ")}
-            style={
-              {
-                background: palette.dim,
-                color: palette.hex,
-                // ring color matches team hex at 40% opacity
-                "--tw-ring-color": `${palette.hex}66`,
-              } as React.CSSProperties
-            }
-            aria-hidden="true"
-          >
-            {glyph}
-          </div>
-
-          {/* Name + role stack */}
-          <div className="flex-1 min-w-0">
-            <p className="text-body-sm font-semibold leading-tight truncate text-surface-accent dark:text-gray-100 tracking-tight">
-              {display.name}
-            </p>
-            <p className="text-caption text-gray-500 dark:text-gray-400 truncate leading-tight mt-0.5">
-              {soul.role}
-            </p>
-          </div>
-
-          {/* Payload type badge — pill shape, top-right */}
-          <span
-            className={[
-              "flex-none self-start mt-0.5",
-              "px-1.5 py-0.5 rounded-pill",
-              "text-[0.65rem] font-mono font-semibold leading-none tracking-wider",
-              "bg-gray-100 dark:bg-gray-800",
-              "text-gray-500 dark:text-gray-400",
-              "border border-gray-200 dark:border-gray-700",
-            ].join(" ")}
-            title={schemas.payload_type}
-          >
-            {typeTag}
-          </span>
-        </div>
-
-        {/* Row 2: Description (one line, muted) */}
-        <p className="text-caption text-gray-500 dark:text-gray-500 line-clamp-2 leading-snug">
-          {display.description}
+      <div className="flex flex-col flex-1 p-2 gap-1">
+        {/* Name — prominent, no icon */}
+        <p className="text-body-sm font-bold leading-tight truncate text-surface-accent dark:text-white tracking-tight">
+          {display.name}
+        </p>
+        <p className="text-[0.6rem] text-gray-500 dark:text-gray-400 truncate">
+          {soul.role}
         </p>
 
-        {/* Row 3: Footer — model badge left, tags right */}
+        {/* Footer — model badge left, tags right */}
         <div className="flex items-center justify-between mt-auto gap-1.5">
           {/* Model badge — charcoal pill, monospace */}
           <span

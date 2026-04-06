@@ -45,32 +45,32 @@ function AgentNodeComponent({
       style={{ borderLeft: `4px solid ${borderColor}` }}
       onDoubleClick={() => setExpanded(!expanded)}
     >
-      {/* Input handles */}
+      {/* Input handle — large, visible, glowing on hover */}
       <Handle
         type="target"
         position={Position.Left}
-        className="!w-3 !h-3 !bg-gray-400 !border-2 !border-surface-primary"
+        className="!w-4 !h-4 !bg-[#1E40AF] !border-2 !border-[#7dd3fc] hover:!bg-[#7dd3fc] hover:!scale-125 !transition-all"
       />
 
-      {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2">
+      {/* Header — name prominent, status dot, model badge */}
+      <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
           <span
-            className={`w-2.5 h-2.5 rounded-full ${statusColors[status]}`}
+            className={`w-3 h-3 rounded-full flex-none ${statusColors[status]}`}
           />
-          <span className="text-body-sm font-semibold text-surface-accent dark:text-gray-100 truncate">
+          <span className="text-body-lg font-bold text-surface-accent dark:text-white truncate tracking-tight">
             {manifest.display.name}
           </span>
         </div>
-        <span className="text-caption text-gray-500 dark:text-gray-400 truncate max-w-[120px]">
+        <span className="text-body-sm text-gray-500 dark:text-gray-400 truncate max-w-[140px] font-mono">
           {manifest.model.preferred.model_id.split("/").pop()}
         </span>
       </div>
 
-      {/* Collapsed: payload type + port summary */}
+      {/* Collapsed: payload type */}
       {!expanded && (
-        <div className="px-3 pb-2">
-          <span className="text-caption text-gray-400">
+        <div className="px-4 pb-3">
+          <span className="text-body-sm text-gray-400">
             {manifest.schemas.payload_type}
           </span>
         </div>
@@ -110,11 +110,11 @@ function AgentNodeComponent({
         </div>
       )}
 
-      {/* Output handles */}
+      {/* Output handle — large, visible, glowing on hover */}
       <Handle
         type="source"
         position={Position.Right}
-        className="!w-3 !h-3 !bg-gray-400 !border-2 !border-surface-primary"
+        className="!w-4 !h-4 !bg-[#166534] !border-2 !border-[#4ade80] hover:!bg-[#4ade80] hover:!scale-125 !transition-all"
       />
     </div>
   );

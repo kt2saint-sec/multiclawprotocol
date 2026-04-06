@@ -40,29 +40,38 @@ export function AgentPalette() {
   }, [filtered]);
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-3">
+    <div className="flex items-start gap-3 px-3 py-2 overflow-x-auto">
+      {/* Search - compact for horizontal layout */}
+      <div className="flex-none w-[160px] self-center">
         <PaletteSearch value={search} onChange={setSearch} />
       </div>
-      <div className="flex-1 overflow-y-auto px-2 pb-2 space-y-3">
-        {TEAM_ORDER.filter((t) => grouped[t]?.length).map((team) => (
-          <div key={team}>
-            <div className="text-caption text-gray-500 uppercase tracking-widest px-1 mb-1">
+
+      {/* Agent cards grouped by team, scrolling horizontally */}
+      {TEAM_ORDER.filter((t) => grouped[t]?.length).map((team) => (
+        <div key={team} className="flex-none flex items-start gap-2">
+          {/* Team label - vertical */}
+          <div className="flex-none self-center">
+            <span
+              className="text-[0.6rem] font-bold tracking-widest text-gray-500 uppercase"
+              style={{ writingMode: "vertical-lr", textOrientation: "mixed" }}
+            >
               {TEAM_LABELS[team] || team}
-            </div>
-            <div className="flex flex-col gap-2">
-              {grouped[team].map((a) => (
-                <DraggableAgentCard key={a.id} manifest={a} />
-              ))}
-            </div>
+            </span>
           </div>
-        ))}
-        {filtered.length === 0 && (
-          <p className="text-caption text-gray-400 text-center py-8">
-            No agents found
-          </p>
-        )}
-      </div>
+          {/* Cards */}
+          <div className="flex gap-1.5">
+            {grouped[team].map((a) => (
+              <DraggableAgentCard key={a.id} manifest={a} />
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {filtered.length === 0 && (
+        <p className="text-caption text-gray-400 self-center px-4">
+          No agents found
+        </p>
+      )}
     </div>
   );
 }

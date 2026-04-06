@@ -7,5 +7,11 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
+    hmr: {
+      overlay: true,
+    },
+  },
+  optimizeDeps: {
+    include: ["@xyflow/react", "zustand"],
   },
 });
