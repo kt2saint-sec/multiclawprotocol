@@ -28,7 +28,7 @@ const defaults = {
   execution: {
     isolation: "subprocess" as const,
     docker_image: null,
-    working_dir: "/mnt/nvme-fast/hermes-workspace",
+    working_dir: "./workspace",
     env_required: [],
     env_optional: [],
   },

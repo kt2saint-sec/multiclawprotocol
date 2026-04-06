@@ -2,6 +2,8 @@ mod commands;
 mod engine;
 
 use commands::execution::ExecutionManager;
+#[cfg(debug_assertions)]
+use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -22,13 +24,19 @@ pub fn run() {
             commands::execution::cancel_run,
             commands::execution::get_run_status,
         ])
-        .setup(|app| {
-            if cfg!(debug_assertions) {
-                app.handle().plugin(
-                    tauri_plugin_log::Builder::default()
-                        .level(log::LevelFilter::Info)
-                        .build(),
-                )?;
+        .plugin(
+            tauri_plugin_log::Builder::default()
+                .level(if cfg!(debug_assertions) {
+                    log::LevelFilter::Debug
+                } else {
+                    log::LevelFilter::Info
+                })
+                .build(),
+        )
+        .setup(|_app| {
+            #[cfg(debug_assertions)]
+            if let Some(window) = _app.get_webview_window("main") {
+                window.open_devtools();
             }
             Ok(())
         })

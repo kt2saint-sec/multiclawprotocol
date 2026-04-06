@@ -17,9 +17,17 @@ pub struct RunnerConfig {
 
 impl Default for RunnerConfig {
     fn default() -> Self {
+        let workspace = std::env::var("OPENCLAW_WORKSPACE")
+            .map(PathBuf::from)
+            .unwrap_or_else(|_| {
+                dirs::data_local_dir()
+                    .unwrap_or_else(|| PathBuf::from("."))
+                    .join("multiclawprotocol")
+                    .join("runs")
+            });
         Self {
             hermes_bin: "hermes".to_string(),
-            workspace_base: PathBuf::from("/mnt/nvme-fast/hermes-workspace/runs"),
+            workspace_base: workspace,
         }
     }
 }
