@@ -1,168 +1,187 @@
-# MULTI**CLAW**PROTOCOL
+<p align="center">
+  <img src="public/logos/multiclawprotocol-logo.png" alt="MultiClawProtocol" width="400" />
+</p>
 
-Visual AI Agent Orchestration Platform — drag-and-drop pipeline builder for 18 AI agents.
+<p align="center">
+  <strong>Visual AI Agent Orchestration Platform</strong><br/>
+  Drag-and-drop pipeline builder for 18 autonomous AI agents
+</p>
 
-Built with Tauri 2 + React 19 + TypeScript + Rust. Proprietary software by Karl Toussaint (kt2saint-sec).
+<p align="center">
+  <img src="https://img.shields.io/badge/version-0.1.0-blue" alt="Version" />
+  <img src="https://img.shields.io/badge/license-Apache%202.0-green" alt="License" />
+  <img src="https://img.shields.io/badge/tauri-v2-orange" alt="Tauri" />
+  <img src="https://img.shields.io/badge/react-19-61dafb" alt="React" />
+  <img src="https://img.shields.io/badge/rust-1.77+-brown" alt="Rust" />
+  <img src="https://img.shields.io/badge/platform-Linux-lightgrey" alt="Platform" />
+</p>
+
+---
 
 ## Screenshots
 
 | | |
 |---|---|
 | ![Login](docs/screenshots/01-login.png) | ![First Launch](docs/screenshots/02-first-launch.png) |
-| Sign In / Create Account with T&C | Dependency checker (all optional) |
+| **Sign In** — Email, GitHub, Google OAuth + T&C | **Dependency Check** — all optional, never blocks |
 | ![Pipeline](docs/screenshots/04-pipeline.png) | ![3D Map](docs/screenshots/03-3d-map.png) |
-| Drag-and-drop pipeline canvas | 3D agent network with team permissions |
+| **Pipeline Canvas** — drag agents, connect, configure, run | **3D Network** — live agent topology + team permissions |
 | ![Terminal](docs/screenshots/05-terminal.png) | ![Logs](docs/screenshots/06-logs.png) |
-| Real bash PTY + connector chat | Agent logs with filtering |
+| **Terminal + Chat** — real bash PTY + Telegram/Signal/Discord | **Log Viewer** — errors, tokens, killswitch, filtered |
 | ![Settings](docs/screenshots/07-settings.png) | |
-| API keys, 2FA, models, profile | |
+| **Settings** — API keys, 2FA, models, profile, delete account | |
+
+---
+
+## Features
+
+- **18 pre-built AI agents** across 5 teams (Brain, Forge, Hustle, Solo, Supervisors)
+- **Drag-and-drop pipeline canvas** with typed connections and DAG execution
+- **Create custom agents** with SOUL.md persona, tools, and model selection
+- **3 autonomy modes**: Manual (approve each step), Auto (run all), Checkpoint (resume on crash)
+- **Real bash terminal** via PTY — run `claude`, `ollama serve`, any command
+- **Connector chat** — Telegram, Signal, Discord, Slack, WhatsApp, Matrix integration
+- **3D agent visualization** — interactive network graph with team permissions legend
+- **Agent files to disk** — SOUL.md, config.yaml, tools.json at `~/.multiclawprotocol/agents/`
+- **ChromaDB integration** — semantic search and agent memory
+- **Daily session logs** — rotated log files at `~/.multiclawprotocol/logs/`
+- **Health monitoring** — Ollama, LiteLLM, ChromaDB status with smart polling backoff
+- **Light + dark mode** with full theme support
+- **2FA** via TOTP (Google Authenticator, Authy) — free on all Supabase plans
+- **Terms & Conditions** with anonymized telemetry disclosure
+- **Account deletion** from Settings
+- **GitHub + Google OAuth** sign-in
+
+---
 
 ## Quick Start
 
 ### 1. Auto-Install (recommended)
 
 ```bash
+git clone https://github.com/kt2saint-sec/multiclawprotocol.git
+cd multiclawprotocol
 bash scripts/setup.sh
 ```
 
-This detects your OS and installs everything: Rust, Node.js, Tauri CLI, ChromaDB, Hermes Agent, and optionally Ollama + Docker.
+Detects your OS (.deb/.rpm/Arch/openSUSE) and installs: Rust, Node.js, Tauri CLI, ChromaDB, Hermes Agent. Optionally installs Ollama + Docker.
 
-### 1b. Manual Install
-
-```bash
-# ChromaDB (required — agent memory)
-pip install chromadb sentence-transformers
-
-# Hermes Agent (bundled, but can install standalone)
-pip install hermes-agent && hermes init
-
-# Ollama (optional — local model hosting)
-curl -fsSL https://ollama.com/install.sh | sh
-ollama serve &
-ollama pull qwen3.5:latest    # text + vision + tools, 430K context
-
-# Docker (optional — sandboxed execution for BUILDER agent)
-curl -fsSL https://get.docker.com | sh
-```
-
-### 2. Run from Source (Development)
+### 2. Run from Source
 
 ```bash
-git clone <repo-url>
-cd multiclawprotocol
 npm install
-npm run dev          # Vite dev server on localhost:5173
+npm run dev          # Vite dev server
 ```
 
-### 3. Run Desktop App (Production)
+### 3. Build Desktop App
 
 ```bash
-# Install the .deb package
-sudo dpkg -i MultiClawProtocol_0.1.0_amd64.deb
-
-# Or run the AppImage directly
-chmod +x MultiClawProtocol_0.1.0_amd64.AppImage
-./MultiClawProtocol_0.1.0_amd64.AppImage
+cargo tauri build --bundles deb    # .deb package
+cargo tauri build                  # .deb + .rpm + .AppImage
 ```
 
-### 4. Configure API Keys (optional for cloud models)
+### 4. Install & Run
 
-Go to **Settings** tab → API Keys. Add keys for any providers you want to use:
+```bash
+sudo dpkg -i src-tauri/target/release/bundle/deb/MultiClawProtocol_0.1.0_amd64.deb
+multiclawprotocol
+```
 
-| Provider | What it enables | Cost |
-|----------|----------------|------|
-| OpenRouter | Qwen, Gemma, DeepSeek, GLM models | $0-$4/M tokens |
-| Anthropic | Claude Sonnet/Opus | $3-$15/M tokens |
+### 5. Configure API Keys (optional)
+
+Go to **Settings** → API Keys. No keys needed for local Ollama models.
+
+| Provider | Models | Cost |
+|----------|--------|------|
+| OpenRouter | Qwen, Gemma, DeepSeek, GLM | $0–$4/M tokens |
+| Anthropic | Claude Sonnet/Opus | $3–$15/M tokens |
 | OpenAI | GPT-4o | Varies |
-| Google AI | Gemini | Varies |
-| Ollama (local) | Any local model | Free |
+| Ollama (local) | Any model | Free |
 
-No API keys needed for local Ollama models.
+---
 
-## How to Use
+## How It Works
 
 ### Building a Pipeline
 
-1. **Drag** an agent card from the bottom bar onto the canvas
-2. **Connect** agents: drag from the green output handle (right) to the blue input handle (left)
-3. **Configure** each agent: click a node → Inspector panel opens on the right
-4. **Run** the pipeline: click the green ▶ Run button (bottom-left)
+1. **Drag** agents from the bottom palette onto the canvas
+2. **Connect** them: green handle (output) → blue handle (input)
+3. **Configure**: click a node → Inspector opens (model, soul, tools)
+4. **Run**: click ▶ Run — engine walks the DAG in dependency order
 
-### Editing an Agent's Soul
+### Agent Souls
 
-The "soul" is the agent's personality — it defines role, goal, and behavioral constraints.
-
-1. Click an agent node on the canvas
-2. Go to the **Soul** tab in the Inspector
-3. Edit **Role** (job title), **Goal** (mission), **Constraints** (rules)
-4. Changes save automatically when you click away
-
-### Giving Instructions to Agents
-
-When you click **▶ Run**, the execution engine:
-1. Walks the pipeline graph in dependency order
-2. Passes the pipeline context + previous agent outputs to each agent
-3. Each agent receives its SOUL.md as the system prompt + the task as the user prompt
-4. Outputs flow through typed edges to downstream agents
-
-To customize what an agent does: edit its **Goal** in the Soul tab. Be specific.
+Each agent has a `SOUL.md` — role, goal, constraints. Edit in the Inspector's Soul tab. The soul is injected as the system prompt at runtime.
 
 ### Autonomy Modes
 
-Set before running (bottom-left, next to Run button):
-
 | Mode | Behavior |
 |------|----------|
-| **Manual** | Pauses at every node for your approval |
-| **Auto** | Runs to completion without stopping |
-| **Checkpoint** | Saves state after each node (resume if interrupted) |
+| **Manual** | Pauses after each agent — you review and choose: pass context or fresh start |
+| **Auto** | Runs the full pipeline without stopping |
+| **Checkpoint** | Saves state after each node — resume from last checkpoint on crash |
+
+---
 
 ## The 18 Base Agents
 
-| Team | Agents | Color |
-|------|--------|-------|
-| **The Brain** | STRATEGIST, INTEL, LEGAL-EXPERT | Blue |
-| **The Forge** | CODEREVIEW, BUILDER, BORIS, GITHUB-SCOUT | Green |
-| **The Hustle** | SALES&CLOSER, MARKETER, DTF-EXPERT | Amber |
-| **Solo** | ORCHESTRATOR, PROXY, SENTINEL, DESIGNER, SPEC-LOADER | Purple |
-| **Supervisors** | BRAIN-SUPERVISOR, FORGE-SUPERVISOR, HUSTLE-SUPERVISOR | Red |
+| Team | Agents | Permissions |
+|------|--------|-------------|
+| **Brain** (blue) | STRATEGIST, INTEL, LEGAL-EXPERT | Research, planning, memory read/write |
+| **Forge** (green) | CODEREVIEW, BUILDER, BORIS, GITHUB-SCOUT | Code execution, file write, Docker, shell |
+| **Hustle** (amber) | SALES&CLOSER, MARKETER, DTF-EXPERT | Web access, API calls, external services |
+| **Solo** (purple) | ORCHESTRATOR, PROXY, SENTINEL, DESIGNER, SPEC-LOADER | Scoped tools only |
+| **Supervisors** (red) | BRAIN-SUP, FORGE-SUP, HUSTLE-SUP | Full read, revision authority, quality gate |
 
-All agents are pre-configured with default models, tools, and souls. Fully customizable.
+All agents are fully customizable. Create your own with **+ Create Agent**.
 
-## Pages
-
-| Page | Description |
-|------|-------------|
-| **Pipeline** | Drag-and-drop canvas for building agent pipelines |
-| **3D Map** | Interactive 3D visualization of the agent network |
-| **Terminal** | Built-in command terminal (sandboxed) |
-| **Logs** | Agent errors, token usage, killswitch events |
-| **Settings** | API keys, local/cloud models, user profile |
-| **Help** | Quick-start guide + topic-based help |
+---
 
 ## Tech Stack
 
-- **Desktop**: Tauri 2 (Rust backend + WebView frontend)
-- **Frontend**: React 19, TypeScript, Tailwind CSS v4, React Flow v12, Zustand 5
-- **Backend**: Rust (tokio async, rusqlite, reqwest)
-- **Agent Runtime**: Hermes Agent (NousResearch, MIT)
-- **Memory**: ChromaDB with Universal I/O envelope format
-- **Models**: OpenRouter, Anthropic, OpenAI, Google, Ollama (local)
-- **Auth**: Supabase (optional, local-only mode available)
+| Layer | Technology |
+|-------|-----------|
+| Desktop shell | Tauri 2 (Rust + WebView) |
+| Frontend | React 19, TypeScript 5.9, Tailwind CSS 4, React Flow 12, Zustand 5 |
+| Backend | Rust (tokio, reqwest, rusqlite, portable-pty) |
+| Agent runtime | Hermes Agent + ChromaDB |
+| Auth | Supabase (email, GitHub, Google, 2FA TOTP) |
+| Models | OpenRouter, Anthropic, OpenAI, Google, Ollama |
+| Terminal | xterm.js + real PTY via portable-pty |
+| Chat | Telegram, Signal, Discord, Slack, WhatsApp, Matrix connectors |
 
-## Build
+---
+
+## File Structure
+
+```
+~/.multiclawprotocol/
+  agents/<id>/          # Per-agent: SOUL.md, config.yaml, tools.json, memories/
+  checkpoints/          # SQLite checkpoint state for pipeline resume
+  chromadb/             # Vector embeddings (4 collections)
+  logs/                 # Daily rotating session logs
+  memories/             # Global MEMORY.md + USER.md
+  pipelines/            # Saved pipeline YAML files
+  workspace/            # Agent execution workspace
+```
+
+---
+
+## Build Commands
 
 ```bash
-npm run build         # Frontend only (Vite)
-npm run typecheck     # TypeScript strict check
+npm run build         # Frontend (Vite)
+npm run typecheck     # TypeScript strict
 npm run lint          # ESLint
 cargo tauri build     # Full desktop app (.deb, .rpm, .AppImage)
 ```
 
+---
+
 ## License
 
-Proprietary — Copyright (c) 2026 Karl Toussaint (kt2saint-sec). All Rights Reserved.
+Apache License 2.0 — Copyright (c) 2026 Karl Toussaint (kt2saint-sec).
 
-See [LICENSE](LICENSE) for full terms. Third-party dependencies listed in [THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md).
+See [LICENSE](LICENSE) for full terms. Third-party dependencies in [THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md).
 
-Built on [OpenClaw](https://github.com/openclaw/openclaw) (MIT) and [Hermes Agent](https://github.com/NousResearch/hermes-agent) (MIT).
+Built on [Hermes Agent](https://github.com/NousResearch/hermes-agent) (MIT).
