@@ -92,11 +92,20 @@ const API_KEY_FIELDS: ApiKeyConfig[] = [
     label: "OpenRouter Pool #3",
     placeholder: "sk-or-v1-...",
   },
-  { id: "anthropic", label: "Anthropic API Key", placeholder: "sk-ant-..." },
+  { id: "anthropic", label: "Anthropic", placeholder: "sk-ant-..." },
+  { id: "openai", label: "OpenAI", placeholder: "sk-..." },
+  { id: "google", label: "Google AI", placeholder: "AIza..." },
+  { id: "grok", label: "Grok (xAI)", placeholder: "xai-..." },
+  { id: "mistral", label: "Mistral", placeholder: "..." },
   {
     id: "ollama_host",
     label: "Ollama Host",
     placeholder: "http://localhost:11434",
+  },
+  {
+    id: "litellm_host",
+    label: "LiteLLM Proxy",
+    placeholder: "http://localhost:4000",
   },
 ];
 
@@ -137,7 +146,7 @@ export function ApiKeysPage() {
       const host = keys.ollama_host || "http://localhost:11434";
       try {
         const resp = await fetch(`${host}/api/tags`, {
-          signal: AbortSignal.timeout(5000),
+          signal: AbortSignal.timeout(2000),
         });
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const data = await resp.json();
@@ -148,10 +157,9 @@ export function ApiKeysPage() {
             modified_at: String(m.modified_at || ""),
           })),
         );
-      } catch (e) {
-        setLocalError(
-          e instanceof Error ? e.message : "Failed to connect to Ollama",
-        );
+        setLocalError(null);
+      } catch {
+        setLocalError("Not running — start with: ollama serve");
         setLocalModels([]);
       } finally {
         setLocalLoading(false);

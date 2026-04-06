@@ -58,7 +58,7 @@ export function TopNav({
             onClick={() => onNavigate(page.id)}
             className={`px-3 py-1 text-caption font-medium rounded-pill transition-all ${
               currentPage === page.id
-                ? "bg-[#1B3A6B] text-white shadow-md"
+                ? "bg-red-600 text-white shadow-md"
                 : "text-gray-500 hover:text-gray-300"
             }`}
           >
@@ -67,24 +67,21 @@ export function TopNav({
         ))}
       </div>
 
-      {/* Right: Theme + Auth */}
-      <div className="flex items-center gap-3">
+      {/* Right: Theme + Sign In + Sign Out */}
+      <div className="flex items-center gap-2">
         <ThemeToggle />
-        {isAuthenticated ? (
-          <button
-            onClick={onSignOut}
-            className="px-3 py-1 text-caption font-medium rounded-pill border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 transition-colors"
-          >
-            Sign Out
-          </button>
-        ) : (
-          <button
-            onClick={onSignIn}
-            className="px-3 py-1 text-caption font-medium rounded-pill bg-[#1B3A6B] text-white hover:bg-[#1E40AF] transition-colors"
-          >
-            Sign In
-          </button>
-        )}
+        <button
+          onClick={onSignIn}
+          className="px-3 py-1 text-caption font-medium rounded-pill border border-gray-700 text-gray-400 hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
+        >
+          Sign In
+        </button>
+        <button
+          onClick={onSignOut}
+          className="px-3 py-1 text-caption font-medium rounded-pill border border-gray-700 text-gray-400 hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
+        >
+          Sign Out
+        </button>
       </div>
     </nav>
   );

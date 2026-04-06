@@ -1,5 +1,6 @@
 import { memo, useState } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { useFlowStore } from "../../stores/flowStore";
 import type { AgentManifest } from "../../types/agent";
 
 const TEAM_COLORS: Record<string, string> = {
@@ -19,10 +20,12 @@ interface AgentNodeData {
 }
 
 function AgentNodeComponent({
+  id,
   data,
   selected,
-}: NodeProps & { data: AgentNodeData }) {
+}: NodeProps & { id: string; data: AgentNodeData }) {
   const [expanded, setExpanded] = useState(false);
+  const removeNode = useFlowStore((s) => s.removeNode);
   const { manifest, status } = data;
   const borderColor =
     TEAM_COLORS[manifest.display.color_class] ||
@@ -52,9 +55,9 @@ function AgentNodeComponent({
         className="!w-4 !h-4 !bg-[#1E40AF] !border-2 !border-[#7dd3fc] hover:!bg-[#7dd3fc] hover:!scale-125 !transition-all"
       />
 
-      {/* Header — name prominent, status dot, model badge */}
+      {/* Header — name + model + delete */}
       <div className="flex items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           <span
             className={`w-3 h-3 rounded-full flex-none ${statusColors[status]}`}
           />
@@ -62,9 +65,22 @@ function AgentNodeComponent({
             {manifest.display.name}
           </span>
         </div>
-        <span className="text-body-sm text-gray-500 dark:text-gray-400 truncate max-w-[140px] font-mono">
-          {manifest.model.preferred.model_id.split("/").pop()}
-        </span>
+        <div className="flex items-center gap-2 flex-none">
+          <span className="text-body-sm text-gray-500 dark:text-gray-400 truncate max-w-[120px] font-mono">
+            {manifest.model.preferred.model_id.split("/").pop()}
+          </span>
+          {/* Delete button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              removeNode(id);
+            }}
+            className="w-5 h-5 flex items-center justify-center rounded text-gray-600 hover:text-red-400 hover:bg-red-400/10 transition-colors text-caption"
+            title="Remove from pipeline"
+          >
+            x
+          </button>
+        </div>
       </div>
 
       {/* Collapsed: payload type */}

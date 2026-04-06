@@ -101,10 +101,11 @@ export function ExecutionToolbar() {
 
   return (
     <div className="flex items-center gap-1.5">
+      {/* Run — green */}
       <button
         onClick={handleRun}
         disabled={!canRun || nodes.length === 0}
-        className={`${btnBase} bg-[#1B3A6B] text-white hover:bg-[#1E40AF]`}
+        className={`${btnBase} bg-[#166534] text-white hover:bg-[#15803d]`}
         title={
           nodes.length === 0 ? "Add agents to the canvas first" : "Run pipeline"
         }
@@ -112,10 +113,11 @@ export function ExecutionToolbar() {
         {status === "running" ? "⟳ Run" : "▶ Run"}
       </button>
 
+      {/* Pause — orange */}
       {status === "paused" ? (
         <button
           onClick={handleResume}
-          className={`${btnBase} border border-[#166534] text-[#4ade80] hover:bg-[#166534]/20`}
+          className={`${btnBase} bg-[#166534] text-white hover:bg-[#15803d]`}
           title="Resume execution"
         >
           ▶ Resume
@@ -124,17 +126,18 @@ export function ExecutionToolbar() {
         <button
           onClick={handlePause}
           disabled={!canPause}
-          className={`${btnBase} border border-gray-600 text-gray-400 hover:bg-gray-800`}
+          className={`${btnBase} bg-[#92400e] text-white hover:bg-[#b45309]`}
           title="Pause execution"
         >
           ⏸ Pause
         </button>
       )}
 
+      {/* Stop — red */}
       <button
         onClick={handleStop}
         disabled={!canStop}
-        className={`${btnBase} border border-gray-600 text-gray-400 hover:border-red-500 hover:text-red-400`}
+        className={`${btnBase} bg-[#991b1b] text-white hover:bg-[#dc2626]`}
         title="Stop execution"
       >
         ◼ Stop

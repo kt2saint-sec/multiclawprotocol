@@ -23,6 +23,7 @@ export default function App() {
     Boolean(localStorage.getItem("anvilbus-auth")),
   );
   const [currentPage, setCurrentPage] = useState("canvas");
+  const [inspectorOpen, setInspectorOpen] = useState(true);
 
   const handleAuthenticated = useCallback(() => setAuthenticated(true), []);
 
@@ -73,14 +74,22 @@ export default function App() {
               canvas={<PipelineCanvas />}
               inspector={
                 <div className="flex flex-col h-full">
-                  <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700">
                     <h2 className="text-caption font-bold tracking-widest text-surface-accent dark:text-gray-300">
                       INSPECTOR
                     </h2>
+                    <button
+                      onClick={() => setInspectorOpen(!inspectorOpen)}
+                      className="text-caption text-gray-500 hover:text-gray-300 transition-colors"
+                      title={inspectorOpen ? "Collapse" : "Expand"}
+                    >
+                      {inspectorOpen ? "▸" : "◂"}
+                    </button>
                   </div>
-                  <InspectorWrapper />
+                  {inspectorOpen && <InspectorWrapper />}
                 </div>
               }
+              inspectorCollapsed={!inspectorOpen}
               statusBar={<StatusBar />}
             />
           )}

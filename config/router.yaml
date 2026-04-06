@@ -1,0 +1,161 @@
+# AnvilBus Model Router — LiteLLM Proxy Config
+# Runtime: litellm --config router.yaml --port 4000
+
+model_list:
+  # ── LOCAL: Ollama on AMD RX 7900 XTX ──
+  - model_name: balanced
+    litellm_params:
+      model: ollama_chat/gemma4:26b-a4b-q4_K_M
+      api_base: "http://localhost:11434"
+      keep_alive: "15m"
+      stream: true
+    model_info:
+      input_cost_per_token: 0
+      output_cost_per_token: 0
+      max_tokens: 32768
+      supports_function_calling: true
+      supports_vision: true
+
+  - model_name: reasoning
+    litellm_params:
+      model: ollama_chat/qwen3:32b-q4_K_M
+      api_base: "http://localhost:11434"
+      keep_alive: "15m"
+      stream: true
+    model_info:
+      input_cost_per_token: 0
+      output_cost_per_token: 0
+      max_tokens: 32768
+      supports_function_calling: true
+
+  - model_name: fast
+    litellm_params:
+      model: ollama_chat/gemma4:e4b-q8_0
+      api_base: "http://localhost:11434"
+      keep_alive: "30m"
+      stream: true
+    model_info:
+      input_cost_per_token: 0
+      output_cost_per_token: 0
+      max_tokens: 8192
+      supports_function_calling: true
+      supports_vision: true
+
+  - model_name: embed
+    litellm_params:
+      model: ollama/nomic-embed-text
+      api_base: "http://localhost:11434"
+      keep_alive: "60m"
+    model_info:
+      input_cost_per_token: 0
+      output_cost_per_token: 0
+      mode: embedding
+
+  # ── CLOUD: OpenRouter ──
+  - model_name: coding
+    litellm_params:
+      model: openrouter/z-ai/glm-4.7
+      api_key: "os.environ/OPENROUTER_API_KEY"
+      api_base: "https://openrouter.ai/api/v1"
+    model_info:
+      input_cost_per_token: 0.00000039
+      output_cost_per_token: 0.00000175
+      max_tokens: 203000
+      supports_function_calling: true
+
+  - model_name: coding-fast
+    litellm_params:
+      model: openrouter/z-ai/glm-4.7-flash
+      api_key: "os.environ/OPENROUTER_API_KEY"
+      api_base: "https://openrouter.ai/api/v1"
+    model_info:
+      input_cost_per_token: 0.00000006
+      output_cost_per_token: 0.0000004
+      max_tokens: 203000
+      supports_function_calling: true
+
+  - model_name: budget
+    litellm_params:
+      model: openrouter/qwen/qwen3-32b
+      api_key: "os.environ/OPENROUTER_API_KEY"
+      api_base: "https://openrouter.ai/api/v1"
+    model_info:
+      input_cost_per_token: 0.00000008
+      output_cost_per_token: 0.00000024
+      max_tokens: 41000
+      supports_function_calling: true
+
+  - model_name: free
+    litellm_params:
+      model: openrouter/google/gemma-3-27b-it:free
+      api_key: "os.environ/OPENROUTER_API_KEY"
+      api_base: "https://openrouter.ai/api/v1"
+    model_info:
+      input_cost_per_token: 0
+      output_cost_per_token: 0
+      max_tokens: 131072
+      supports_function_calling: true
+      supports_vision: true
+
+  # ── ANTHROPIC: Meridian Proxy (primary) + Direct (fallback) ──
+  - model_name: premium
+    litellm_params:
+      model: anthropic/claude-sonnet-4-20250514
+      api_key: "os.environ/MERIDIAN_PROXY_API_KEY"
+      api_base: "os.environ/MERIDIAN_PROXY_BASE_URL"
+    model_info:
+      input_cost_per_token: 0.000003
+      output_cost_per_token: 0.000015
+      max_tokens: 64000
+      supports_function_calling: true
+      supports_vision: true
+    order: 1
+
+  - model_name: premium
+    litellm_params:
+      model: anthropic/claude-sonnet-4-20250514
+      api_key: "os.environ/ANTHROPIC_API_KEY"
+    model_info:
+      input_cost_per_token: 0.000003
+      output_cost_per_token: 0.000015
+      max_tokens: 64000
+      supports_function_calling: true
+      supports_vision: true
+    order: 2
+
+router_settings:
+  routing_strategy: simple-shuffle
+  fallbacks:
+    - balanced: ["free", "budget"]
+    - reasoning: ["budget", "coding"]
+    - coding: ["coding-fast", "budget"]
+    - premium: ["coding", "reasoning"]
+    - fast: ["coding-fast", "free"]
+  context_window_fallbacks:
+    - balanced: ["budget"]
+    - reasoning: ["coding"]
+    - fast: ["balanced"]
+  num_retries: 3
+  timeout: 120
+  allowed_fails: 3
+  cooldown_time: 60
+  model_group_alias:
+    "agentic": "balanced"
+    "web-research": "balanced"
+    "light": "fast"
+    "zero-cost": "fast"
+  enable_pre_call_checks: true
+
+litellm_settings:
+  count_tokens: true
+  drop_params: true
+  cache: true
+  cache_params:
+    type: local
+    ttl: 1800
+
+general_settings:
+  master_key: "os.environ/LITELLM_MASTER_KEY"
+  background_health_checks: true
+  health_check_interval: 120
+  enable_health_check_routing: true
