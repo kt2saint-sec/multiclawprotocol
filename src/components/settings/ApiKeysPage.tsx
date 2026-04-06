@@ -1,5 +1,108 @@
 import { useState, useEffect } from "react";
 
+// ── Profile Section ──
+function ProfileSection() {
+  const [profile, setProfile] = useState({ email: "", name: "", provider: "" });
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("anvilbus-auth");
+      if (stored) {
+        const data = JSON.parse(stored);
+        setProfile({
+          email: data.email || "",
+          name: data.name || "",
+          provider: data.provider || "local",
+        });
+        setEditName(data.name || "");
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const saveName = () => {
+    try {
+      const stored = localStorage.getItem("anvilbus-auth");
+      if (stored) {
+        const data = JSON.parse(stored);
+        data.name = editName;
+        localStorage.setItem("anvilbus-auth", JSON.stringify(data));
+        setProfile((p) => ({ ...p, name: editName }));
+      }
+    } catch {
+      /* ignore */
+    }
+    setEditing(false);
+  };
+
+  return (
+    <section className="bg-[#1A1C24] border border-gray-700/50 rounded-node p-5">
+      <h2 className="text-body-sm font-bold text-white mb-4">Profile</h2>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-caption text-gray-400">Email</span>
+          <span className="text-body-sm font-mono text-white">
+            {profile.email || "—"}
+          </span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-caption text-gray-400">Display Name</span>
+          {editing ? (
+            <div className="flex items-center gap-2">
+              <input
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="px-2 py-1 text-caption font-mono rounded bg-[#0F1117] border border-gray-700/50 text-white focus:border-red-500 outline-none"
+                autoFocus
+                onKeyDown={(e) => e.key === "Enter" && saveName()}
+              />
+              <button
+                onClick={saveName}
+                className="text-caption text-red-400 hover:text-red-300"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => setEditing(false)}
+                className="text-caption text-gray-500"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="text-body-sm text-white">
+                {profile.name || "—"}
+              </span>
+              <button
+                onClick={() => setEditing(true)}
+                className="text-caption text-gray-500 hover:text-gray-300"
+              >
+                Edit
+              </button>
+            </div>
+          )}
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-caption text-gray-400">Auth Provider</span>
+          <span
+            className={`text-caption font-mono px-2 py-0.5 rounded-pill ${
+              profile.provider === "supabase"
+                ? "bg-red-500/20 text-red-400 border border-red-500/30"
+                : "bg-gray-700/50 text-gray-400 border border-gray-600/30"
+            }`}
+          >
+            {profile.provider || "local"}
+          </span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ── Top OpenRouter models (curated from routing table) ──
 const TOP_OPENROUTER_MODELS = [
   {
@@ -207,9 +310,12 @@ export function ApiKeysPage() {
             Settings
           </h1>
           <p className="text-body-sm text-gray-500 mt-1">
-            API keys, local models, and cloud model routing.
+            Profile, API keys, local models, and cloud model routing.
           </p>
         </div>
+
+        {/* ── Profile ── */}
+        <ProfileSection />
 
         {/* ── API Keys ── */}
         <section>

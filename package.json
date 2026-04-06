@@ -1,7 +1,11 @@
 {
   "name": "multiclawprotocol",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "MultiClawProtocol - Visual Agent Orchestration Platform",
+  "author": "Karl Toussaint <kt2saint-sec>",
+  "license": "SEE LICENSE IN LICENSE",
+  "repository": "https://github.com/kt2saint-sec/multiclawprotocol",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,6 +14,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.101.1",
     "@tailwindcss/vite": "^4.2.2",
     "@tauri-apps/api": "^2.10.1",
     "@xterm/addon-fit": "^0.11.0",

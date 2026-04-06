@@ -2,8 +2,9 @@
 name = "multiclawprotocol"
 version = "0.1.0"
 description = "MultiClawProtocol - Visual Agent Orchestration Platform"
-authors = ["Ghost (rebelsts)"]
-license = "MIT"
+authors = ["Karl Toussaint <kt2saint-sec>"]
+license = "Proprietary"
+repository = "https://github.com/kt2saint-sec/multiclawprotocol"
 edition = "2021"
 rust-version = "1.77.2"
 

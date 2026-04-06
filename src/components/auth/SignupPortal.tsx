@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { supabase, isSupabaseConfigured } from "../../lib/supabase";
 
 interface SignupPortalProps {
   onAuthenticated: () => void;
@@ -17,9 +18,6 @@ export function SignupPortal({ onAuthenticated }: SignupPortalProps) {
     setError(null);
     setLoading(true);
 
-    // Simulate auth — replace with real backend later
-    await new Promise((r) => setTimeout(r, 800));
-
     if (!email || !password) {
       setError("Email and password are required");
       setLoading(false);
@@ -32,13 +30,50 @@ export function SignupPortal({ onAuthenticated }: SignupPortalProps) {
       return;
     }
 
-    // Store auth state
-    localStorage.setItem(
-      "anvilbus-auth",
-      JSON.stringify({ email, name: name || email.split("@")[0] }),
-    );
-    setLoading(false);
-    onAuthenticated();
+    // Use Supabase if configured, otherwise fall back to localStorage
+    if (isSupabaseConfigured()) {
+      try {
+        if (mode === "signup") {
+          const { error: signUpError } = await supabase.auth.signUp({
+            email,
+            password,
+            options: { data: { full_name: name } },
+          });
+          if (signUpError) throw signUpError;
+        } else {
+          const { error: signInError } = await supabase.auth.signInWithPassword(
+            { email, password },
+          );
+          if (signInError) throw signInError;
+        }
+        localStorage.setItem(
+          "anvilbus-auth",
+          JSON.stringify({
+            email,
+            name: name || email.split("@")[0],
+            provider: "supabase",
+          }),
+        );
+        onAuthenticated();
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Authentication failed");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // Local-only mode (no Supabase configured)
+      await new Promise((r) => setTimeout(r, 400));
+      localStorage.setItem(
+        "anvilbus-auth",
+        JSON.stringify({
+          email,
+          name: name || email.split("@")[0],
+          provider: "local",
+        }),
+      );
+      setLoading(false);
+      onAuthenticated();
+    }
   };
 
   return (
