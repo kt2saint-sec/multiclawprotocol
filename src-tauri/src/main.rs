@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-  anvilbus_lib::run();
+  multiclawprotocol_lib::run();
 }

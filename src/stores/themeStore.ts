@@ -7,14 +7,14 @@ interface ThemeState {
 
 export const useThemeStore = create<ThemeState>((set) => ({
   isDark: (() => {
-    const stored = localStorage.getItem('anvilbus-theme')
+    const stored = localStorage.getItem('mcp-theme')
     if (stored) return stored === 'dark'
     return window.matchMedia('(prefers-color-scheme: dark)').matches
   })(),
   toggle: () =>
     set((state) => {
       const next = !state.isDark
-      localStorage.setItem('anvilbus-theme', next ? 'dark' : 'light')
+      localStorage.setItem('mcp-theme', next ? 'dark' : 'light')
       return { isDark: next }
     }),
 }))

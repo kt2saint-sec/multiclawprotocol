@@ -1,34 +1,38 @@
+import { ReactFlowProvider } from '@xyflow/react'
 import { AppLayout } from './components/layout/AppLayout'
 import { ThemeProvider, ThemeToggle } from './components/layout/ThemeToggle'
 import { StatusBar } from './components/layout/StatusBar'
+import { PipelineCanvas } from './components/canvas/PipelineCanvas'
+import { AgentPalette } from './components/palette/AgentPalette'
+import { InspectorPanel } from './components/inspector/InspectorPanel'
 import './styles/globals.css'
 
 export default function App() {
   return (
     <ThemeProvider>
-      <AppLayout
-        palette={
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold tracking-widest text-surface-accent dark:text-gray-300">AGENTS</h2>
-              <ThemeToggle />
+      <ReactFlowProvider>
+        <AppLayout
+          palette={
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-caption font-bold tracking-widest text-surface-accent dark:text-gray-300">AGENTS</h2>
+                <ThemeToggle />
+              </div>
+              <AgentPalette />
             </div>
-            <p className="text-caption text-gray-500">Drag agents onto the canvas</p>
-          </div>
-        }
-        canvas={
-          <div className="flex items-center justify-center h-full text-gray-400">
-            Pipeline Canvas
-          </div>
-        }
-        inspector={
-          <div className="p-4">
-            <h2 className="text-sm font-bold tracking-widest text-surface-accent dark:text-gray-300">INSPECTOR</h2>
-            <p className="text-caption text-gray-500 mt-2">Select a node to inspect</p>
-          </div>
-        }
-        statusBar={<StatusBar />}
-      />
+          }
+          canvas={<PipelineCanvas />}
+          inspector={
+            <div className="flex flex-col h-full">
+              <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-caption font-bold tracking-widest text-surface-accent dark:text-gray-300">INSPECTOR</h2>
+              </div>
+              <InspectorPanel selectedAgent={null} />
+            </div>
+          }
+          statusBar={<StatusBar />}
+        />
+      </ReactFlowProvider>
     </ThemeProvider>
   )
 }
