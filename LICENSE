@@ -9,6 +9,20 @@ This software, MultiClawProtocol, including all source code, documentation,
 designs, agent configurations, and associated materials, is the exclusive
 intellectual property of Karl Toussaint ("Licensor").
 
+MultiClawProtocol incorporates and builds upon the following open-source
+projects, which are NOT owned by the Licensor:
+
+- OpenClaw (MIT License) — Copyright Peter Steinberger & contributors, 2025-2026
+  Source: https://github.com/openclaw/openclaw
+  Used for: agent coordination patterns, Universal I/O envelope format,
+  two-way ChromaDB memory architecture
+
+- Hermes Agent (MIT License) — Copyright NousResearch, 2024-2026
+  Source: https://github.com/NousResearch/hermes-agent
+  Used for: agent runtime, profile management, LLM orchestration
+
+See THIRD-PARTY-LICENSES.md for the complete list of all dependencies.
+
 1. OWNERSHIP
    The Licensor retains all rights, title, and interest in and to the Software.
    No rights are granted except as explicitly stated herein.

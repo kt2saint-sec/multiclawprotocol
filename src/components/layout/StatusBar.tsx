@@ -6,7 +6,7 @@ import { CostTicker } from "../execution/CostTicker";
 export function StatusBar() {
   const [time, setTime] = useState(new Date().toLocaleTimeString());
   const { health } = useRouterHealth();
-  const { status, totalCostUsd } = useExecutionStore();
+  const { status } = useExecutionStore();
 
   useEffect(() => {
     const interval = setInterval(

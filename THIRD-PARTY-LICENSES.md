@@ -3,6 +3,13 @@
 MultiClawProtocol incorporates the following open-source components.
 Each is governed by its respective license.
 
+## Core Platform Dependencies
+
+| Component | License | Copyright | Role |
+|-----------|---------|-----------|------|
+| OpenClaw | MIT | Peter Steinberger & OpenClaw contributors, 2025-2026 | Self-hosted AI gateway connecting chat apps to AI agents. MultiClawProtocol uses OpenClaw's coordination patterns for agent orchestration, Universal I/O envelope format, and two-way ChromaDB memory architecture. 247K+ GitHub stars. Source: https://github.com/openclaw/openclaw |
+| Hermes Agent | MIT | NousResearch, 2024-2026 | Agent runtime — profile management, LLM orchestration, tool execution, MCP servers, memory providers. MultiClawProtocol spawns Hermes agents via CLI subprocess. Source: https://github.com/NousResearch/hermes-agent |
+
 ## Frontend Dependencies
 
 | Package | Version | License | Copyright |

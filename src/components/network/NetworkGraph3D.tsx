@@ -375,7 +375,9 @@ export function NetworkGraph3D() {
     setZoom((z) => Math.max(0.3, Math.min(3, z - e.deltaY * 0.001)));
   };
 
-  const hoveredNodeData = nodesRef.current.find((n) => n.id === hoveredNode);
+  const hoveredNodeData = hoveredNode
+    ? agents.find((a) => a.id === hoveredNode)
+    : undefined;
 
   return (
     <div className="w-full h-full relative bg-[#0F1117]">
@@ -416,9 +418,11 @@ export function NetworkGraph3D() {
       {/* Hovered agent info panel */}
       {hoveredNode && hoveredNodeData && (
         <div className="absolute top-4 left-4 bg-[#1A1C24] border border-gray-700/50 rounded-node px-4 py-3 shadow-lg">
-          <p className="text-sm font-bold text-white">{hoveredNodeData.name}</p>
+          <p className="text-sm font-bold text-white">
+            {hoveredNodeData.display.name}
+          </p>
           <p className="text-[0.65rem] text-gray-400">
-            {hoveredNodeData.team} team
+            {hoveredNodeData.display.color_class} team
           </p>
         </div>
       )}

@@ -1,21 +1,25 @@
-import { useState, useEffect } from 'react'
-import type { AgentManifest } from '../../types/agent'
+import { useState, useEffect } from "react";
+import type { AgentManifest } from "../../types/agent";
 
 interface SoulEditorProps {
-  manifest: AgentManifest
-  onUpdate?: (manifest: AgentManifest) => void
+  manifest: AgentManifest;
+  onUpdate?: (manifest: AgentManifest) => void;
 }
 
 export function SoulEditor({ manifest, onUpdate }: SoulEditorProps) {
-  const [role, setRole] = useState(manifest.soul.role)
-  const [goal, setGoal] = useState(manifest.soul.goal)
-  const [constraints, setConstraints] = useState(manifest.soul.constraints.join('\n'))
+  const [role, setRole] = useState(manifest.soul.role);
+  const [goal, setGoal] = useState(manifest.soul.goal);
+  const [constraints, setConstraints] = useState(
+    manifest.soul.constraints.join("\n"),
+  );
 
   useEffect(() => {
-    setRole(manifest.soul.role)
-    setGoal(manifest.soul.goal)
-    setConstraints(manifest.soul.constraints.join('\n'))
-  }, [manifest.id])
+    void (() => {
+      setRole(manifest.soul.role);
+      setGoal(manifest.soul.goal);
+      setConstraints(manifest.soul.constraints.join("\n"));
+    })();
+  }, [manifest.id]);
 
   const save = () => {
     onUpdate?.({
@@ -24,10 +28,10 @@ export function SoulEditor({ manifest, onUpdate }: SoulEditorProps) {
         ...manifest.soul,
         role,
         goal,
-        constraints: constraints.split('\n').filter(Boolean),
+        constraints: constraints.split("\n").filter(Boolean),
       },
-    })
-  }
+    });
+  };
 
   return (
     <div className="space-y-3">
@@ -53,7 +57,9 @@ export function SoulEditor({ manifest, onUpdate }: SoulEditorProps) {
         />
       </div>
       <div>
-        <label className="text-caption text-gray-500 block mb-1">Constraints (one per line)</label>
+        <label className="text-caption text-gray-500 block mb-1">
+          Constraints (one per line)
+        </label>
         <textarea
           value={constraints}
           onChange={(e) => setConstraints(e.target.value)}
@@ -64,5 +70,5 @@ export function SoulEditor({ manifest, onUpdate }: SoulEditorProps) {
         />
       </div>
     </div>
-  )
+  );
 }

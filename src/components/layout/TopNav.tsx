@@ -69,21 +69,24 @@ export function TopNav({
         ))}
       </div>
 
-      {/* Right: Theme + Sign In + Sign Out */}
+      {/* Right: Theme + Sign In / Sign Out */}
       <div className="flex items-center gap-2">
         <ThemeToggle />
-        <button
-          onClick={onSignIn}
-          className="px-3 py-1 text-caption font-medium rounded-pill border border-gray-700 text-gray-400 hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
-        >
-          Sign In
-        </button>
-        <button
-          onClick={onSignOut}
-          className="px-3 py-1 text-caption font-medium rounded-pill border border-gray-700 text-gray-400 hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
-        >
-          Sign Out
-        </button>
+        {!isAuthenticated ? (
+          <button
+            onClick={onSignIn}
+            className="px-3 py-1 text-caption font-medium rounded-pill border border-gray-700 text-gray-400 hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
+          >
+            Sign In
+          </button>
+        ) : (
+          <button
+            onClick={onSignOut}
+            className="px-3 py-1 text-caption font-medium rounded-pill border border-gray-700 text-gray-400 hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
+          >
+            Sign Out
+          </button>
+        )}
       </div>
     </nav>
   );

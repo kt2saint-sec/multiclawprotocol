@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Terminal } from "xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import { WebLinksAddon } from "@xterm/addon-web-links";
@@ -155,7 +155,6 @@ async function executeCommand(cmd: string): Promise<string> {
 export function TerminalView() {
   const containerRef = useRef<HTMLDivElement>(null);
   const termRef = useRef<Terminal | null>(null);
-  const [inputBuffer, setInputBuffer] = useState("");
 
   useEffect(() => {
     if (!containerRef.current || termRef.current) return;

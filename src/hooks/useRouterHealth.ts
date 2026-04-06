@@ -122,8 +122,12 @@ export function useRouterHealth() {
   }, []);
 
   useEffect(() => {
-    check();
-    const interval = setInterval(check, POLL_INTERVAL_MS);
+    void (async () => {
+      await check();
+    })();
+    const interval = setInterval(() => {
+      void check();
+    }, POLL_INTERVAL_MS);
     return () => clearInterval(interval);
   }, [check]);
 

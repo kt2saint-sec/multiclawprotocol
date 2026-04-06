@@ -81,7 +81,7 @@ export const useAgentRegistryStore = create<AgentRegistryState>()(
         lastLoadedAt: state.lastLoadedAt,
         initialized: state.initialized,
       }),
-      onRehydrate: (_state, options) => {
+      onRehydrate: () => {
         // After rehydration, auto-install base agents if not initialized
         return (rehydrated) => {
           if (rehydrated && !rehydrated.initialized) {

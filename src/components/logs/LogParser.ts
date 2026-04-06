@@ -128,6 +128,7 @@ export function mergeAndSort(entries: UnifiedLogEntry[]): UnifiedLogEntry[] {
  * In Tauri desktop mode: wire up tauri-plugin-fs here when building the desktop app.
  * Pipeline execution logs come from executionStore instead (always available).
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function fetchLogFile(_path: string): Promise<string> {
   // Browser can't read local files. When running as Tauri desktop app,
   // replace this with: invoke('read_log_file', { path: _path })

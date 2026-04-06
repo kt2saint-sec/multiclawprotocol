@@ -13,6 +13,7 @@ import { ApiKeysPage } from "./components/settings/ApiKeysPage";
 import { NetworkGraph3D } from "./components/network/NetworkGraph3D";
 import { TerminalView } from "./components/terminal/TerminalView";
 import { LogViewerPage } from "./components/logs/LogViewerPage";
+import { FirstLaunchCheck } from "./components/setup/FirstLaunchCheck";
 import { useExecutionEvents } from "./hooks/useExecutionEvents";
 import { useAgentRegistryStore } from "./stores/agentRegistryStore";
 import { DEMO_AGENTS } from "./data/demo-agents";
@@ -21,11 +22,19 @@ import "./styles/globals.css";
 export default function App() {
   useExecutionEvents();
 
+  const [setupDone, setSetupDone] = useState(() =>
+    Boolean(localStorage.getItem("anvilbus-setup-done")),
+  );
   const [authenticated, setAuthenticated] = useState(() =>
     Boolean(localStorage.getItem("anvilbus-auth")),
   );
   const [currentPage, setCurrentPage] = useState("canvas");
   const [inspectorOpen, setInspectorOpen] = useState(true);
+
+  const handleSetupComplete = useCallback(() => {
+    localStorage.setItem("anvilbus-setup-done", "true");
+    setSetupDone(true);
+  }, []);
 
   const handleAuthenticated = useCallback(() => setAuthenticated(true), []);
 
@@ -42,6 +51,11 @@ export default function App() {
   useEffect(() => {
     useAgentRegistryStore.getState().registerAgents(DEMO_AGENTS);
   }, []);
+
+  // First launch: dependency check
+  if (!setupDone) {
+    return <FirstLaunchCheck onComplete={handleSetupComplete} />;
+  }
 
   if (!authenticated) {
     return <SignupPortal onAuthenticated={handleAuthenticated} />;

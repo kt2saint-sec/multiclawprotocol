@@ -7,20 +7,22 @@ function ProfileSection() {
   const [editName, setEditName] = useState("");
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("anvilbus-auth");
-      if (stored) {
-        const data = JSON.parse(stored);
-        setProfile({
-          email: data.email || "",
-          name: data.name || "",
-          provider: data.provider || "local",
-        });
-        setEditName(data.name || "");
+    void (() => {
+      try {
+        const stored = localStorage.getItem("anvilbus-auth");
+        if (stored) {
+          const data = JSON.parse(stored);
+          setProfile({
+            email: data.email || "",
+            name: data.name || "",
+            provider: data.provider || "local",
+          });
+          setEditName(data.name || "");
+        }
+      } catch {
+        /* ignore */
       }
-    } catch {
-      /* ignore */
-    }
+    })();
   }, []);
 
   const saveName = () => {

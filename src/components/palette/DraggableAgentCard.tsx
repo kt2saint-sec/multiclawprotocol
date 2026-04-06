@@ -37,62 +37,6 @@ const TEAM_PALETTE: Record<string, { hex: string; dim: string; glow: string }> =
     },
   };
 
-// ── Payload type short labels ─────────────────────────────────────────────────
-// payload_type strings are snake_case from the manifest; shorten for the badge.
-const PAYLOAD_ABBR: Record<string, string> = {
-  research_briefing: "RESEARCH",
-  code_artifact: "CODE",
-  design_artifact: "DESIGN",
-  strategic_signal: "SIGNAL",
-  verdict: "VERDICT",
-  review_report: "REVIEW",
-  intel_brief: "INTEL",
-  task_spec: "SPEC",
-  security_report: "SECURITY",
-  orchestration_task: "TASK",
-  pipeline_result: "RESULT",
-};
-
-// ── Icon placeholder ──────────────────────────────────────────────────────────
-// Renders a 2-char glyph derived from the Lucide icon name until Lucide is wired.
-// Rules: compass→CO, brain→BR, zap→ZP, shield→SH, etc.
-// Falls back to first two letters of icon name uppercased.
-const ICON_GLYPHS: Record<string, string> = {
-  compass: "CO",
-  brain: "BR",
-  zap: "ZP",
-  shield: "SH",
-  search: "SR",
-  code: "CD",
-  git_branch: "GB",
-  users: "US",
-  bot: "BT",
-  flask: "FK",
-  cpu: "CP",
-  eye: "EY",
-  scale: "SC",
-  paintbrush: "PB",
-  layers: "LY",
-  router: "RT",
-  activity: "AC",
-  target: "TG",
-  wrench: "WR",
-  terminal: "TM",
-  database: "DB",
-  globe: "GL",
-  lock: "LK",
-  star: "ST",
-  sparkles: "SP",
-  network: "NW",
-  workflow: "WF",
-  message_circle: "MC",
-};
-
-function iconGlyph(iconName: string): string {
-  const normalized = iconName.toLowerCase().replace(/-/g, "_");
-  return ICON_GLYPHS[normalized] ?? iconName.slice(0, 2).toUpperCase();
-}
-
 // ── Model short label ─────────────────────────────────────────────────────────
 // "google/gemma-4-26b-a4b-it" → "gemma-4-26b"
 // "deepseek/deepseek-v3.2"   → "deepseek-v3.2"
@@ -111,12 +55,9 @@ interface DraggableAgentCardProps {
 }
 
 export function DraggableAgentCard({ manifest }: DraggableAgentCardProps) {
-  const { display, soul, model, schemas } = manifest;
+  const { display, soul, model } = manifest;
   const palette = TEAM_PALETTE[display.color_class] ?? TEAM_PALETTE.gray;
-  const glyph = iconGlyph(display.icon);
   const modelTag = shortModelId(model.preferred.model_id);
-  const typeTag =
-    PAYLOAD_ABBR[schemas.payload_type] ?? schemas.payload_type.toUpperCase();
 
   // ── Drag handler ─────────────────────────────────────────────────────────
   function onDragStart(e: React.DragEvent) {

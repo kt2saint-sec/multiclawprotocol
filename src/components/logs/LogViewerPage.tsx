@@ -82,8 +82,8 @@ export function LogViewerPage() {
 
   // Initial load + polling
   useEffect(() => {
-    loadLogs();
-    const interval = setInterval(loadLogs, POLL_INTERVAL);
+    void (async () => { await loadLogs(); })();
+    const interval = setInterval(() => { void loadLogs(); }, POLL_INTERVAL);
     return () => clearInterval(interval);
   }, []);
 
