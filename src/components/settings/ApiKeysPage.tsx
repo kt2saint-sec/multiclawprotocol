@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { supabase, isSupabaseConfigured } from "../../lib/supabase";
 
 // ── Profile Section ──
 function ProfileSection() {
@@ -101,7 +102,198 @@ function ProfileSection() {
           </span>
         </div>
       </div>
+
+      {/* Two-Factor Authentication */}
+      <div className="mt-4 pt-4 border-t border-gray-700/30">
+        <TwoFactorSection />
+      </div>
+
+      {/* Delete Account */}
+      <div className="mt-4 pt-4 border-t border-gray-700/30">
+        <button
+          onClick={() => {
+            if (
+              window.confirm(
+                "Are you sure you want to delete your account? This action cannot be undone. All your data will be permanently removed within 30 days.",
+              )
+            ) {
+              localStorage.clear();
+              window.location.reload();
+            }
+          }}
+          className="text-[0.65rem] text-red-400/70 hover:text-red-400 transition-colors"
+        >
+          Delete my account
+        </button>
+      </div>
     </section>
+  );
+}
+
+// ── Two-Factor Authentication ──
+function TwoFactorSection() {
+  const [mfaEnabled, setMfaEnabled] = useState(false);
+  const [enrolling, setEnrolling] = useState(false);
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [verifyCode, setVerifyCode] = useState("");
+  const [factorId, setFactorId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured() || !supabase) return;
+    void (async () => {
+      const { data } = await supabase.auth.mfa.listFactors();
+      if (data?.totp && data.totp.length > 0) {
+        setMfaEnabled(true);
+        setFactorId(data.totp[0].id);
+      }
+    })();
+  }, []);
+
+  const startEnroll = async () => {
+    if (!supabase) return;
+    setError(null);
+    setEnrolling(true);
+    const { data, error: e } = await supabase.auth.mfa.enroll({
+      factorType: "totp",
+      friendlyName: "MultiClawProtocol",
+    });
+    if (e) {
+      setError(e.message);
+      setEnrolling(false);
+      return;
+    }
+    setQrCode(data.totp.qr_code);
+    setFactorId(data.id);
+  };
+
+  const verifyEnroll = async () => {
+    if (!supabase || !factorId) return;
+    setError(null);
+    const { data: ch, error: e1 } = await supabase.auth.mfa.challenge({
+      factorId,
+    });
+    if (e1) {
+      setError(e1.message);
+      return;
+    }
+    const { error: e2 } = await supabase.auth.mfa.verify({
+      factorId,
+      challengeId: ch.id,
+      code: verifyCode,
+    });
+    if (e2) {
+      setError(e2.message);
+      return;
+    }
+    setMfaEnabled(true);
+    setEnrolling(false);
+    setQrCode(null);
+    setVerifyCode("");
+    setSuccess("2FA enabled");
+    setTimeout(() => setSuccess(null), 3000);
+  };
+
+  const unenroll = async () => {
+    if (!supabase || !factorId) return;
+    const { error: e } = await supabase.auth.mfa.unenroll({ factorId });
+    if (e) {
+      setError(e.message);
+      return;
+    }
+    setMfaEnabled(false);
+    setFactorId(null);
+    setSuccess("2FA disabled");
+    setTimeout(() => setSuccess(null), 3000);
+  };
+
+  if (!isSupabaseConfigured())
+    return (
+      <p className="text-[0.65rem] text-gray-300">
+        2FA requires Supabase authentication.
+      </p>
+    );
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-caption font-semibold text-gray-200">
+          Two-Factor Authentication
+        </span>
+        <span
+          className={`text-[0.6rem] font-mono px-2 py-0.5 rounded-pill ${mfaEnabled ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-gray-700/50 text-gray-300 border border-gray-600/30"}`}
+        >
+          {mfaEnabled ? "Enabled" : "Disabled"}
+        </span>
+      </div>
+      {error && (
+        <p className="text-[0.65rem] text-red-400 bg-red-400/10 rounded px-2 py-1 mb-2">
+          {error}
+        </p>
+      )}
+      {success && (
+        <p className="text-[0.65rem] text-green-400 bg-green-400/10 rounded px-2 py-1 mb-2">
+          {success}
+        </p>
+      )}
+      {!mfaEnabled && !enrolling && (
+        <button
+          onClick={() => void startEnroll()}
+          className="text-[0.65rem] font-semibold text-white bg-[#1B3A6B] hover:bg-[#1E40AF] px-3 py-1.5 rounded-pill transition-colors"
+        >
+          Enable 2FA
+        </button>
+      )}
+      {enrolling && qrCode && (
+        <div className="space-y-3 mt-2">
+          <p className="text-[0.65rem] text-gray-300">
+            Scan with your authenticator app:
+          </p>
+          <div className="flex justify-center">
+            <img
+              src={qrCode}
+              alt="2FA QR"
+              className="w-40 h-40 rounded bg-white p-2"
+            />
+          </div>
+          <div className="flex gap-2">
+            <input
+              value={verifyCode}
+              onChange={(e) => setVerifyCode(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && void verifyEnroll()}
+              placeholder="6-digit code"
+              maxLength={6}
+              className="flex-1 px-2 py-1.5 text-caption font-mono rounded bg-[#0F1117] border border-gray-700/50 text-white placeholder-gray-600 focus:border-[#1B3A6B] outline-none"
+            />
+            <button
+              onClick={() => void verifyEnroll()}
+              disabled={verifyCode.length !== 6}
+              className="px-3 py-1.5 text-[0.65rem] font-semibold rounded bg-[#166534] text-white hover:bg-[#15803d] disabled:opacity-40 transition-colors"
+            >
+              Verify
+            </button>
+          </div>
+          <button
+            onClick={() => {
+              setEnrolling(false);
+              setQrCode(null);
+            }}
+            className="text-[0.6rem] text-gray-500 hover:text-gray-300"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+      {mfaEnabled && (
+        <button
+          onClick={() => void unenroll()}
+          className="text-[0.65rem] text-red-400/70 hover:text-red-400 transition-colors mt-1"
+        >
+          Disable 2FA
+        </button>
+      )}
+    </div>
   );
 }
 
