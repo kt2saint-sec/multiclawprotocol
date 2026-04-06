@@ -1,64 +1,78 @@
-import { memo, useState } from 'react'
-import { Handle, Position, type NodeProps } from '@xyflow/react'
-import type { AgentManifest } from '../../types/agent'
+import { memo, useState } from "react";
+import { Handle, Position, type NodeProps } from "@xyflow/react";
+import type { AgentManifest } from "../../types/agent";
 
 const TEAM_COLORS: Record<string, string> = {
-  blue: '#4A90D9',
-  green: '#50C878',
-  amber: '#FFB347',
-  purple: '#9B59B6',
-  red: '#EF4444',
-  gray: '#6B7280',
-}
+  blue: "#1B3A6B",
+  green: "#1A5632",
+  amber: "#FFB347",
+  purple: "#6B21A8",
+  red: "#DC2626",
+  gray: "#4B5563",
+};
 
 interface AgentNodeData {
-  manifest: AgentManifest
-  status: 'idle' | 'running' | 'success' | 'error'
-  outputPayloadType?: string
-  inputAcceptTypes?: string[]
+  manifest: AgentManifest;
+  status: "idle" | "running" | "success" | "error";
+  outputPayloadType?: string;
+  inputAcceptTypes?: string[];
 }
 
-function AgentNodeComponent({ data, selected }: NodeProps & { data: AgentNodeData }) {
-  const [expanded, setExpanded] = useState(false)
-  const { manifest, status } = data
-  const borderColor = TEAM_COLORS[manifest.display.color_class] || manifest.display.color_hex || '#6B7280'
+function AgentNodeComponent({
+  data,
+  selected,
+}: NodeProps & { data: AgentNodeData }) {
+  const [expanded, setExpanded] = useState(false);
+  const { manifest, status } = data;
+  const borderColor =
+    TEAM_COLORS[manifest.display.color_class] ||
+    manifest.display.color_hex ||
+    "#6B7280";
 
   const statusColors = {
-    idle: 'bg-status-idle',
-    running: 'bg-status-running animate-pulse-slow',
-    success: 'bg-status-success',
-    error: 'bg-status-error',
-  }
+    idle: "bg-status-idle",
+    running: "bg-status-running animate-pulse-slow",
+    success: "bg-status-success",
+    error: "bg-status-error",
+  };
 
   return (
     <div
       className={`bg-surface-primary dark:bg-dark-surface-primary rounded-node shadow-node
-        ${selected ? 'shadow-node-active' : 'hover:shadow-node-hover'}
-        ${expanded ? 'w-[360px]' : 'w-[280px]'}
+        ${selected ? "shadow-node-active" : "hover:shadow-node-hover"}
+        ${expanded ? "w-[360px]" : "w-[280px]"}
         transition-all duration-200 cursor-pointer`}
       style={{ borderLeft: `4px solid ${borderColor}` }}
       onDoubleClick={() => setExpanded(!expanded)}
     >
       {/* Input handles */}
-      <Handle type="target" position={Position.Left} className="!w-3 !h-3 !bg-gray-400 !border-2 !border-surface-primary" />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="!w-3 !h-3 !bg-gray-400 !border-2 !border-surface-primary"
+      />
 
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2">
         <div className="flex items-center gap-2">
-          <span className={`w-2.5 h-2.5 rounded-full ${statusColors[status]}`} />
+          <span
+            className={`w-2.5 h-2.5 rounded-full ${statusColors[status]}`}
+          />
           <span className="text-body-sm font-semibold text-surface-accent dark:text-gray-100 truncate">
             {manifest.display.name}
           </span>
         </div>
         <span className="text-caption text-gray-500 dark:text-gray-400 truncate max-w-[120px]">
-          {manifest.model.preferred.model_id.split('/').pop()}
+          {manifest.model.preferred.model_id.split("/").pop()}
         </span>
       </div>
 
       {/* Collapsed: payload type + port summary */}
       {!expanded && (
         <div className="px-3 pb-2">
-          <span className="text-caption text-gray-400">{manifest.schemas.payload_type}</span>
+          <span className="text-caption text-gray-400">
+            {manifest.schemas.payload_type}
+          </span>
         </div>
       )}
 
@@ -67,32 +81,44 @@ function AgentNodeComponent({ data, selected }: NodeProps & { data: AgentNodeDat
         <div className="px-3 pb-3 border-t border-gray-200 dark:border-gray-700 mt-1 pt-2 space-y-2">
           <div>
             <span className="text-caption text-gray-500">Role</span>
-            <p className="text-body-sm text-gray-700 dark:text-gray-300">{manifest.soul.role}</p>
+            <p className="text-body-sm text-gray-700 dark:text-gray-300">
+              {manifest.soul.role}
+            </p>
           </div>
           <div>
             <span className="text-caption text-gray-500">Tools</span>
             <div className="flex flex-wrap gap-1 mt-1">
-              {manifest.tools.filter(t => t.enabled).map(t => (
-                <span key={t.id} className="text-caption px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
-                  {t.id}
-                </span>
-              ))}
+              {manifest.tools
+                .filter((t) => t.enabled)
+                .map((t) => (
+                  <span
+                    key={t.id}
+                    className="text-caption px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+                  >
+                    {t.id}
+                  </span>
+                ))}
             </div>
           </div>
           <div>
             <span className="text-caption text-gray-500">I/O</span>
             <p className="text-caption text-gray-400">
-              in: {Object.keys(manifest.schemas.input).length} fields | out: {manifest.schemas.payload_type}
+              in: {Object.keys(manifest.schemas.input).length} fields | out:{" "}
+              {manifest.schemas.payload_type}
             </p>
           </div>
         </div>
       )}
 
       {/* Output handles */}
-      <Handle type="source" position={Position.Right} className="!w-3 !h-3 !bg-gray-400 !border-2 !border-surface-primary" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="!w-3 !h-3 !bg-gray-400 !border-2 !border-surface-primary"
+      />
     </div>
-  )
+  );
 }
 
-export const AgentNode = memo(AgentNodeComponent)
-export type { AgentNodeData }
+export const AgentNode = memo(AgentNodeComponent);
+export type { AgentNodeData };

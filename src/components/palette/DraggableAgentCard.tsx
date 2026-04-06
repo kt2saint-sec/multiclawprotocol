@@ -1,41 +1,290 @@
-import type { AgentManifest } from '../../types/agent'
+import type { AgentManifest } from "../../types/agent";
 
-const TEAM_COLORS: Record<string, string> = {
-  blue: '#4A90D9', green: '#50C878', amber: '#FFB347',
-  purple: '#9B59B6', red: '#EF4444', gray: '#6B7280',
+// ── Team color map ────────────────────────────────────────────────────────────
+// Maps color_class → { hex, dim (muted bg for card face), glow } tokens.
+// dim is used as the card body background tint in both modes.
+const TEAM_PALETTE: Record<string, { hex: string; dim: string; glow: string }> =
+  {
+    blue: {
+      hex: "#1B3A6B",
+      dim: "rgba(27,58,107,0.18)",
+      glow: "rgba(27,58,107,0.40)",
+    },
+    green: {
+      hex: "#1A5632",
+      dim: "rgba(26,86,50,0.18)",
+      glow: "rgba(26,86,50,0.40)",
+    },
+    amber: {
+      hex: "#FFB347",
+      dim: "rgba(255,179,71,0.14)",
+      glow: "rgba(255,179,71,0.35)",
+    },
+    purple: {
+      hex: "#6B21A8",
+      dim: "rgba(107,33,168,0.18)",
+      glow: "rgba(107,33,168,0.40)",
+    },
+    red: {
+      hex: "#DC2626",
+      dim: "rgba(220,38,38,0.14)",
+      glow: "rgba(220,38,38,0.35)",
+    },
+    gray: {
+      hex: "#4B5563",
+      dim: "rgba(75,85,99,0.14)",
+      glow: "rgba(75,85,99,0.35)",
+    },
+  };
+
+// ── Payload type short labels ─────────────────────────────────────────────────
+// payload_type strings are snake_case from the manifest; shorten for the badge.
+const PAYLOAD_ABBR: Record<string, string> = {
+  research_briefing: "RESEARCH",
+  code_artifact: "CODE",
+  design_artifact: "DESIGN",
+  strategic_signal: "SIGNAL",
+  verdict: "VERDICT",
+  review_report: "REVIEW",
+  intel_brief: "INTEL",
+  task_spec: "SPEC",
+  security_report: "SECURITY",
+  orchestration_task: "TASK",
+  pipeline_result: "RESULT",
+};
+
+// ── Icon placeholder ──────────────────────────────────────────────────────────
+// Renders a 2-char glyph derived from the Lucide icon name until Lucide is wired.
+// Rules: compass→CO, brain→BR, zap→ZP, shield→SH, etc.
+// Falls back to first two letters of icon name uppercased.
+const ICON_GLYPHS: Record<string, string> = {
+  compass: "CO",
+  brain: "BR",
+  zap: "ZP",
+  shield: "SH",
+  search: "SR",
+  code: "CD",
+  git_branch: "GB",
+  users: "US",
+  bot: "BT",
+  flask: "FK",
+  cpu: "CP",
+  eye: "EY",
+  scale: "SC",
+  paintbrush: "PB",
+  layers: "LY",
+  router: "RT",
+  activity: "AC",
+  target: "TG",
+  wrench: "WR",
+  terminal: "TM",
+  database: "DB",
+  globe: "GL",
+  lock: "LK",
+  star: "ST",
+  sparkles: "SP",
+  network: "NW",
+  workflow: "WF",
+  message_circle: "MC",
+};
+
+function iconGlyph(iconName: string): string {
+  const normalized = iconName.toLowerCase().replace(/-/g, "_");
+  return ICON_GLYPHS[normalized] ?? iconName.slice(0, 2).toUpperCase();
 }
 
+// ── Model short label ─────────────────────────────────────────────────────────
+// "google/gemma-4-26b-a4b-it" → "gemma-4-26b"
+// "deepseek/deepseek-v3.2"   → "deepseek-v3.2"
+// "qwen/qwen3-32b"            → "qwen3-32b"
+function shortModelId(modelId: string): string {
+  const slug = modelId.split("/").pop() ?? modelId;
+  // Strip provider prefix repetition (deepseek/deepseek-v3.2 → deepseek-v3.2 already)
+  // Trim suffixes like ":free" or "-it" that add noise
+  return slug.replace(/:free$/, "").replace(/-it$/, "");
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
 interface DraggableAgentCardProps {
-  manifest: AgentManifest
+  manifest: AgentManifest;
 }
 
 export function DraggableAgentCard({ manifest }: DraggableAgentCardProps) {
-  const borderColor = TEAM_COLORS[manifest.display.color_class] || manifest.display.color_hex || '#6B7280'
+  const { display, soul, model, schemas } = manifest;
+  const palette = TEAM_PALETTE[display.color_class] ?? TEAM_PALETTE.gray;
+  const glyph = iconGlyph(display.icon);
+  const modelTag = shortModelId(model.preferred.model_id);
+  const typeTag =
+    PAYLOAD_ABBR[schemas.payload_type] ?? schemas.payload_type.toUpperCase();
 
-  const onDragStart = (event: React.DragEvent) => {
-    event.dataTransfer.setData('application/anvilbus-agent', JSON.stringify(manifest))
-    event.dataTransfer.effectAllowed = 'move'
+  // ── Drag handler ─────────────────────────────────────────────────────────
+  function onDragStart(e: React.DragEvent) {
+    e.dataTransfer.setData(
+      "application/anvilbus-agent",
+      JSON.stringify(manifest),
+    );
+    e.dataTransfer.effectAllowed = "move";
   }
+
+  // ── Dynamic inline styles (only for runtime color values) ────────────────
+  // All structural layout is Tailwind. Color tokens that vary per agent use
+  // CSS custom properties injected here so Tailwind JIT never needs to purge
+  // thousands of arbitrary color permutations.
+  const cardVars = {
+    "--team-hex": palette.hex,
+    "--team-dim": palette.dim,
+    "--team-glow": palette.glow,
+  } as React.CSSProperties;
 
   return (
     <div
       draggable
       onDragStart={onDragStart}
-      className="flex items-center gap-2 px-3 py-2 rounded-md cursor-grab active:cursor-grabbing
-        hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-      style={{ borderLeft: `3px solid ${borderColor}` }}
+      style={cardVars}
+      className={[
+        // ── Card shell ──────────────────────────────────────────────────────
+        // Fixed width fills the 240px palette column with 8px padding each side.
+        // min-h keeps every card the same height so the grid is uniform.
+        "relative flex flex-col w-full min-h-[148px]",
+        "rounded-node overflow-hidden",
+        "cursor-grab active:cursor-grabbing select-none",
+
+        // ── Border: thin outer frame + inner team-color top bar ─────────────
+        "border border-gray-200/70 dark:border-gray-700/60",
+
+        // ── Elevation ───────────────────────────────────────────────────────
+        "shadow-node",
+
+        // ── Hover / drag transitions ─────────────────────────────────────────
+        // On hover: lift shadow and emit a soft team-color glow on the border.
+        // "card-hover" is handled below via group-based CSS trick.
+        "transition-all duration-150 ease-out",
+        "hover:shadow-node-hover",
+        "hover:-translate-y-px",
+        "active:translate-y-0 active:shadow-node",
+
+        // ── Background ──────────────────────────────────────────────────────
+        "bg-surface-primary dark:bg-dark-surface-secondary",
+      ].join(" ")}
     >
-      <div className="flex-1 min-w-0">
-        <div className="text-body-sm font-medium text-surface-accent dark:text-gray-200 truncate">
-          {manifest.display.name}
+      {/* ── Top color bar (holographic foil substitute) ──────────────────── */}
+      {/* Height 3px, full-width gradient from team hex to transparent.        */}
+      {/* In dark mode we make it slightly taller (4px) for better contrast.   */}
+      <div
+        className="h-[3px] dark:h-[4px] w-full flex-none"
+        style={{
+          background: `linear-gradient(90deg, ${palette.hex} 0%, ${palette.hex}88 60%, transparent 100%)`,
+        }}
+      />
+
+      {/* ── Card face ────────────────────────────────────────────────────── */}
+      <div className="flex flex-col flex-1 p-2.5 gap-2">
+        {/* Row 1: Icon orb + name + type badge */}
+        <div className="flex items-center gap-2">
+          {/* Icon orb — colored circle with glyph, team dim background */}
+          <div
+            className={[
+              "flex-none flex items-center justify-center",
+              "w-9 h-9 rounded-node", // 36px, node radius
+              "font-mono font-bold text-caption",
+              // Inner ring using box-shadow (no extra DOM element)
+              "ring-1",
+            ].join(" ")}
+            style={
+              {
+                background: palette.dim,
+                color: palette.hex,
+                // ring color matches team hex at 40% opacity
+                "--tw-ring-color": `${palette.hex}66`,
+              } as React.CSSProperties
+            }
+            aria-hidden="true"
+          >
+            {glyph}
+          </div>
+
+          {/* Name + role stack */}
+          <div className="flex-1 min-w-0">
+            <p className="text-body-sm font-semibold leading-tight truncate text-surface-accent dark:text-gray-100 tracking-tight">
+              {display.name}
+            </p>
+            <p className="text-caption text-gray-500 dark:text-gray-400 truncate leading-tight mt-0.5">
+              {soul.role}
+            </p>
+          </div>
+
+          {/* Payload type badge — pill shape, top-right */}
+          <span
+            className={[
+              "flex-none self-start mt-0.5",
+              "px-1.5 py-0.5 rounded-pill",
+              "text-[0.65rem] font-mono font-semibold leading-none tracking-wider",
+              "bg-gray-100 dark:bg-gray-800",
+              "text-gray-500 dark:text-gray-400",
+              "border border-gray-200 dark:border-gray-700",
+            ].join(" ")}
+            title={schemas.payload_type}
+          >
+            {typeTag}
+          </span>
         </div>
-        <div className="text-caption text-gray-400 truncate">
-          {manifest.schemas.payload_type}
+
+        {/* Row 2: Description (one line, muted) */}
+        <p className="text-caption text-gray-500 dark:text-gray-500 line-clamp-2 leading-snug">
+          {display.description}
+        </p>
+
+        {/* Row 3: Footer — model badge left, tags right */}
+        <div className="flex items-center justify-between mt-auto gap-1.5">
+          {/* Model badge — charcoal pill, monospace */}
+          <span
+            className={[
+              "inline-flex items-center gap-1",
+              "px-2 py-0.5 rounded-pill",
+              "text-[0.65rem] font-mono leading-none",
+              "bg-pill-charcoal text-white dark:bg-dark-surface-secondary dark:text-gray-300",
+              "border border-transparent dark:border-gray-600",
+              "max-w-[120px] truncate",
+            ].join(" ")}
+            title={model.preferred.model_id}
+          >
+            {/* Dot colored with team hex */}
+            <span
+              className="inline-block w-1.5 h-1.5 rounded-full flex-none"
+              style={{ background: palette.hex }}
+              aria-hidden="true"
+            />
+            {modelTag}
+          </span>
+
+          {/* Up to 2 tags — pill-shaped, team color tinted */}
+          <div className="flex items-center gap-1 overflow-hidden">
+            {display.tags.slice(0, 2).map((tag) => (
+              <span
+                key={tag}
+                className="px-1.5 py-0.5 rounded-pill text-[0.6rem] font-medium leading-none truncate max-w-[56px]"
+                style={{
+                  background: palette.dim,
+                  color: palette.hex,
+                }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
-      <span className="text-caption text-gray-500 truncate max-w-[80px]">
-        {manifest.model.preferred.model_id.split('/').pop()}
-      </span>
+
+      {/* ── Drag ghost: subtle team-color overlay on active ─────────────────── */}
+      {/* pointer-events:none so it never blocks mouse events.                  */}
+      {/* The :active state lifts translate-y so this overlay becomes visible   */}
+      {/* only during the drag press via CSS opacity transition.                */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-0 active:opacity-100 transition-opacity"
+        style={{ background: `${palette.hex}0A` }}
+        aria-hidden="true"
+      />
     </div>
-  )
+  );
 }

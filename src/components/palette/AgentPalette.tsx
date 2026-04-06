@@ -5,12 +5,12 @@ import { useAgentRegistryStore } from "../../stores/agentRegistryStore";
 
 const TEAM_ORDER = ["blue", "green", "amber", "purple", "red", "gray"];
 const TEAM_LABELS: Record<string, string> = {
-  blue: "Research",
-  green: "Development",
-  amber: "Intelligence",
-  purple: "Solo",
-  red: "Executor",
-  gray: "Evaluator",
+  blue: "The Brain",
+  green: "The Forge",
+  amber: "The Hustle",
+  purple: "Solo Agents",
+  red: "Supervisors",
+  gray: "Utility",
 };
 
 export function AgentPalette() {
@@ -50,7 +50,7 @@ export function AgentPalette() {
             <div className="text-caption text-gray-500 uppercase tracking-widest px-1 mb-1">
               {TEAM_LABELS[team] || team}
             </div>
-            <div className="space-y-0.5">
+            <div className="flex flex-col gap-2">
               {grouped[team].map((a) => (
                 <DraggableAgentCard key={a.id} manifest={a} />
               ))}

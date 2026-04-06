@@ -1,11 +1,13 @@
 interface PaletteSearchProps {
-  value: string
-  onChange: (v: string) => void
+  value: string;
+  onChange: (v: string) => void;
 }
 
 export function PaletteSearch({ value, onChange }: PaletteSearchProps) {
   return (
     <input
+      id="palette-search"
+      name="palette-search"
       type="text"
       placeholder="Search agents..."
       value={value}
@@ -14,5 +16,5 @@ export function PaletteSearch({ value, onChange }: PaletteSearchProps) {
         border border-gray-200 dark:border-gray-700 rounded-md
         placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-agent-ops"
     />
-  )
+  );
 }

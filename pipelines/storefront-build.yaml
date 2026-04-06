@@ -1,0 +1,105 @@
+pipeline:
+  id: storefront-build
+  name: "Storefront Build Pipeline"
+  version: "1.0.0"
+  description: "End-to-end storefront: research → design → build → review → approve"
+  tags: ["demo", "storefront", "e2e"]
+
+  params:
+    - name: store_type
+      type: string
+      required: true
+      default: "dtf-supplies"
+      description: "Type of storefront to build"
+
+  budget:
+    max_cost_usd: 2.00
+    warn_at_usd: 1.50
+    cost_tracking: true
+
+  execution:
+    mode: dag
+    max_parallel_nodes: 2
+    timeout_seconds: 3600
+    on_budget_exceeded: pause_and_notify
+    checkpointing:
+      enabled: true
+      storage: sqlite
+
+  nodes:
+    - id: n1-research
+      name: "Market Research"
+      agent_ref: researcher
+      inputs:
+        - { name: store_type, type: string, source: "$params.store_type" }
+      outputs:
+        - {
+            name: research_report,
+            type: object,
+            payload_type: research_finding,
+          }
+      budget: { max_cost_usd: 0.30 }
+      timeout_seconds: 300
+
+    - id: n2-design
+      name: "UI Design"
+      agent_ref: designer
+      inputs:
+        - {
+            name: research,
+            type: object,
+            source: "$nodes.n1-research.research_report",
+          }
+      outputs:
+        - { name: design_spec, type: object, payload_type: design_artifact }
+      budget: { max_cost_usd: 0.40 }
+      timeout_seconds: 300
+
+    - id: n3-build
+      name: "Code Generation"
+      agent_ref: builder
+      overrides:
+        isolation: docker
+      inputs:
+        - { name: design, type: object, source: "$nodes.n2-design.design_spec" }
+      outputs:
+        - { name: code, type: object, payload_type: code_submission }
+      budget: { max_cost_usd: 0.50 }
+      timeout_seconds: 600
+
+    - id: n4-boris
+      name: "Boris QA Review"
+      agent_ref: boris
+      inputs:
+        - { name: code, type: object, source: "$nodes.n3-build.code" }
+      outputs:
+        - { name: qa_report, type: object, payload_type: qa_report }
+      budget: { max_cost_usd: 0.20 }
+      timeout_seconds: 300
+
+    - id: n5-codereview
+      name: "Code Review"
+      agent_ref: codereview
+      inputs:
+        - { name: code, type: object, source: "$nodes.n3-build.code" }
+      outputs:
+        - { name: review, type: object, payload_type: code_review }
+      budget: { max_cost_usd: 0.40 }
+      timeout_seconds: 300
+
+    - id: n6-hitl
+      name: "Human Approval"
+      agent_ref: hitl-gate
+      inputs:
+        - { name: qa, type: object, source: "$nodes.n4-boris.qa_report" }
+        - { name: review, type: object, source: "$nodes.n5-codereview.review" }
+      outputs:
+        - { name: decision, type: string, payload_type: hitl_decision }
+
+  edges:
+    - { from: n1-research, to: n2-design }
+    - { from: n2-design, to: n3-build }
+    - { from: n3-build, to: n4-boris }
+    - { from: n3-build, to: n5-codereview }
+    - { from: n4-boris, to: n6-hitl }
+    - { from: n5-codereview, to: n6-hitl }

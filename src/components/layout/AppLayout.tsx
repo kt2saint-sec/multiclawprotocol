@@ -1,10 +1,10 @@
-import React from 'react'
+import React from "react";
 
 interface AppLayoutProps {
-  palette: React.ReactNode
-  canvas: React.ReactNode
-  inspector: React.ReactNode
-  statusBar: React.ReactNode
+  palette: React.ReactNode;
+  canvas: React.ReactNode;
+  inspector: React.ReactNode;
+  statusBar: React.ReactNode;
 }
 
 /**
@@ -19,28 +19,31 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   statusBar,
 }) => {
   return (
-    <div className="h-screen w-screen overflow-hidden bg-surface-primary text-text-primary grid grid-rows-[1fr_auto]">
+    <div className="h-screen w-screen overflow-hidden bg-surface-primary dark:bg-dark-surface-primary text-surface-accent dark:text-gray-200 grid grid-rows-[1fr_auto]">
       {/* Main 3-column area */}
       <div
-        className="grid overflow-hidden"
-        style={{ gridTemplateColumns: '240px 1fr 320px' }}
+        className="grid overflow-hidden min-h-0"
+        style={{ gridTemplateColumns: "240px 1fr 320px" }}
       >
         {/* Left sidebar — Agent Palette */}
         <aside
-          className="h-full overflow-y-auto border-r border-surface-secondary bg-surface-secondary flex flex-col"
+          className="h-full overflow-y-auto border-r border-gray-200 dark:border-gray-700 bg-surface-secondary dark:bg-dark-surface-secondary flex flex-col"
           aria-label="Agent palette"
         >
           {palette}
         </aside>
 
         {/* Center — Pipeline Canvas */}
-        <main className="h-full overflow-hidden relative" aria-label="Pipeline canvas">
+        <main
+          className="h-full overflow-hidden relative bg-surface-primary dark:bg-dark-surface-primary"
+          aria-label="Pipeline canvas"
+        >
           {canvas}
         </main>
 
         {/* Right sidebar — Inspector Panel */}
         <aside
-          className="h-full overflow-y-auto border-l border-surface-secondary bg-surface-secondary flex flex-col"
+          className="h-full overflow-y-auto border-l border-gray-200 dark:border-gray-700 bg-surface-secondary dark:bg-dark-surface-secondary flex flex-col"
           aria-label="Inspector panel"
         >
           {inspector}
@@ -48,11 +51,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
       </div>
 
       {/* Bottom status bar */}
-      <footer className="border-t border-surface-secondary bg-surface-secondary">
+      <footer className="border-t border-gray-200 dark:border-gray-700 bg-surface-secondary dark:bg-dark-surface-secondary">
         {statusBar}
       </footer>
     </div>
-  )
-}
+  );
+};
 
-export default AppLayout
+export default AppLayout;

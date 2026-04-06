@@ -1,40 +1,51 @@
 @import "tailwindcss";
 
-/* ── Design System Theme ── */
+/* Tailwind v4: enable class-based dark mode */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Design System Theme (from design-schema.jpg) ── */
 @theme {
-  /* Light mode surfaces */
+  /* === 1. Background & Surfaces === */
+  /* Light: Bright White, Light Silver, Dark Silver/Charcoal */
   --color-surface-primary: #ffffff;
   --color-surface-secondary: #f2f2f5;
   --color-surface-accent: #292a21;
 
-  /* Dark mode surfaces */
-  --color-dark-surface-primary: #1d1d1f;
-  --color-dark-surface-secondary: #2d2d2f;
-  --color-dark-surface-accent: #293e46;
+  /* Dark: deeper charcoal with blue undertone */
+  --color-dark-surface-primary: #0f1117;
+  --color-dark-surface-secondary: #1a1c24;
+  --color-dark-surface-accent: #7dd3fc;
 
-  /* Agent team colors */
-  --color-agent-ops: #4a90d9;
-  --color-agent-dev: #50c878;
+  /* === 4. Accent Colors === */
+  --color-accent-charcoal: #292a2d;
+  --color-accent-charcoal-bg: #da646e0;
+  --color-accent-silver: #f15bf9;
+  --color-accent-dark-silver: #d4062e8;
+
+  /* Agent team colors — deepened navy/forest */
+  --color-agent-ops: #1b3a6b;
+  --color-agent-dev: #1a5632;
   --color-agent-intel: #ffb347;
-  --color-agent-solo: #9b59b6;
+  --color-agent-solo: #6b21a8;
 
-  /* Payload type colors */
-  --color-payload-briefing: #6366f1;
-  --color-payload-research: #3b82f6;
-  --color-payload-design: #8b5cf6;
-  --color-payload-code: #10b981;
+  /* Payload type colors — deepened */
+  --color-payload-briefing: #4338ca;
+  --color-payload-research: #1e3a8a;
+  --color-payload-design: #6d28d9;
+  --color-payload-code: #166534;
   --color-payload-verdict: #f59e0b;
   --color-payload-review: #ef4444;
-  --color-payload-signal: #ec4899;
+  --color-payload-signal: #be185d;
 
-  /* Status colors */
-  --color-status-running: #3b82f6;
-  --color-status-success: #10b981;
-  --color-status-error: #ef4444;
-  --color-status-paused: #f59e0b;
-  --color-status-idle: #6b7280;
+  /* Status colors — deepened */
+  --color-status-running: #1e40af;
+  --color-status-success: #166534;
+  --color-status-error: #dc2626;
+  --color-status-warning: #d97706;
+  --color-status-paused: #d97706;
+  --color-status-idle: #4b5563;
 
-  /* Typography */
+  /* === 2. Typography System === */
   --font-sans: "Inter", "SF Pro Display", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", monospace;
 
@@ -43,7 +54,7 @@
   --text-display-md: 2rem;
   --text-display-sm: 1.5rem;
   --text-body-lg: 1.125rem;
-  --text-body-md: 1rem;
+  --text-body: 1rem;
   --text-body-sm: 0.875rem;
   --text-caption: 0.75rem;
 
@@ -67,13 +78,15 @@
   --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-flow-edge: flowDash 1.5s linear infinite;
 
-  /* Button gradients */
+  /* === 3. Button Gradients === */
+  /* Light mode */
   --bg-btn-buy-light: linear-gradient(135deg, #d1d0d1, #313b3e);
   --bg-btn-browse-light: linear-gradient(135deg, #1222f5, #d1d1d5);
   --bg-btn-cart-light: linear-gradient(135deg, #0071e3, #004b9b);
-  --bg-btn-buy-dark: linear-gradient(135deg, #1b9f18, #018535);
+  /* Dark mode */
+  --bg-btn-buy-dark: linear-gradient(135deg, #f7c16f, #18535);
   --bg-btn-browse-dark: linear-gradient(135deg, #2222f6, #233355);
-  --bg-btn-cart-dark: linear-gradient(135deg, #3071e3, #ed71eb);
+  --bg-btn-cart-dark: linear-gradient(135deg, #3d99f9, #004593);
 }
 
 @keyframes flowDash {
@@ -90,39 +103,51 @@ body {
   background-color: var(--color-surface-primary);
   color: var(--color-surface-accent);
   font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
 }
 
 .dark body {
   background-color: var(--color-dark-surface-primary);
-  color: #f1f1f1;
+  color: #e5e5e5;
 }
 
-/* ── Button components ── */
+/* ── Button components (from design schema section 3) ── */
+
+/* BUY NOW — dark metallic gradient */
 .btn-buy {
   background: var(--bg-btn-buy-light);
   color: white;
-  font-weight: 600;
-  padding: 0.75rem 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.625rem 1.5rem;
   border-radius: var(--radius-pill);
+  border: none;
+  cursor: pointer;
   transition: all 0.2s;
 }
 .btn-buy:hover {
   opacity: 0.9;
+  transform: translateY(-1px);
 }
 .btn-buy:active {
   transform: scale(0.98);
 }
 .dark .btn-buy {
   background: var(--bg-btn-buy-dark);
+  color: white;
 }
 
+/* BROWSE PRODUCTS — outlined with gradient border */
 .btn-browse {
   background: var(--bg-btn-browse-light);
-  color: #264855;
+  color: #264b55;
   font-weight: 600;
-  padding: 0.75rem 1.5rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.625rem 1.5rem;
   border-radius: var(--radius-pill);
+  border: none;
+  cursor: pointer;
   transition: all 0.2s;
 }
 .btn-browse:hover {
@@ -133,20 +158,73 @@ body {
   color: #a6b8b8;
 }
 
+/* ADD TO CART — blue gradient (primary action) */
 .btn-cart {
   background: var(--bg-btn-cart-light);
   color: white;
-  font-weight: 600;
-  padding: 0.75rem 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.625rem 1.5rem;
   border-radius: var(--radius-pill);
+  border: none;
+  cursor: pointer;
   transition: all 0.2s;
 }
 .btn-cart:hover {
   opacity: 0.9;
+  transform: translateY(-1px);
 }
 .btn-cart:active {
   transform: scale(0.98);
 }
 .dark .btn-cart {
   background: var(--bg-btn-cart-dark);
+  color: white;
+}
+
+/* ── Accent pills (from design schema section 4) ── */
+.pill-charcoal {
+  background: #292a21;
+  color: white;
+  padding: 0.375rem 1rem;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: var(--text-caption);
+}
+.dark .pill-charcoal {
+  background: #da646e;
+  color: white;
+}
+
+.pill-silver {
+  background: linear-gradient(135deg, #5559se, #f15bf9);
+  color: #292a21;
+  padding: 0.375rem 1rem;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: var(--text-caption);
+}
+.dark .pill-silver {
+  background: linear-gradient(135deg, #58595e, #5a5a6c9);
+  color: #e5e5e5;
+}
+
+.pill-dark-silver {
+  background: #d4d6e8;
+  color: #292a21;
+  padding: 0.375rem 1rem;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: var(--text-caption);
+}
+.dark .pill-dark-silver {
+  background: #d4d6e8;
+  color: #1d1d1f;
+}
+
+/* ── Utility classes ── */
+.text-body {
+  font-size: var(--text-body);
+  line-height: 1.5;
 }
