@@ -4,22 +4,42 @@ Visual AI Agent Orchestration Platform — drag-and-drop pipeline builder for 18
 
 Built with Tauri 2 + React 19 + TypeScript + Rust. Proprietary software by Karl Toussaint (kt2saint-sec).
 
+## Screenshots
+
+| | |
+|---|---|
+| ![Login](docs/screenshots/01-login.png) | ![First Launch](docs/screenshots/02-first-launch.png) |
+| Sign In / Create Account with T&C | Dependency checker (all optional) |
+| ![Pipeline](docs/screenshots/04-pipeline.png) | ![3D Map](docs/screenshots/03-3d-map.png) |
+| Drag-and-drop pipeline canvas | 3D agent network with team permissions |
+| ![Terminal](docs/screenshots/05-terminal.png) | ![Logs](docs/screenshots/06-logs.png) |
+| Real bash PTY + connector chat | Agent logs with filtering |
+| ![Settings](docs/screenshots/07-settings.png) | |
+| API keys, 2FA, models, profile | |
+
 ## Quick Start
 
-### 1. Install Dependencies
+### 1. Auto-Install (recommended)
 
 ```bash
-# Hermes Agent (required — the agent runtime)
-pip install hermes-agent
-hermes init
+bash scripts/setup.sh
+```
 
-# Ollama (required — local LLM inference)
-curl -fsSL https://ollama.com/install.sh | sh
-ollama serve &
-ollama pull huihui_ai/qwen3.5-abliterated:9b-q8_0
+This detects your OS and installs everything: Rust, Node.js, Tauri CLI, ChromaDB, Hermes Agent, and optionally Ollama + Docker.
 
+### 1b. Manual Install
+
+```bash
 # ChromaDB (required — agent memory)
 pip install chromadb sentence-transformers
+
+# Hermes Agent (bundled, but can install standalone)
+pip install hermes-agent && hermes init
+
+# Ollama (optional — local model hosting)
+curl -fsSL https://ollama.com/install.sh | sh
+ollama serve &
+ollama pull qwen3.5:latest    # text + vision + tools, 430K context
 
 # Docker (optional — sandboxed execution for BUILDER agent)
 curl -fsSL https://get.docker.com | sh
