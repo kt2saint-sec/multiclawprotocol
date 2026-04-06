@@ -24,7 +24,7 @@ detect_os() {
   if [ -f /etc/os-release ]; then
     . /etc/os-release
     OS_ID="$ID"
-    OS_VERSION="$VERSION_ID"
+    OS_VERSION="${VERSION_ID:-0}"
   else
     OS_ID="unknown"
     OS_VERSION="0"
@@ -35,19 +35,125 @@ detect_os() {
 # ── Check if command exists ──
 has() { command -v "$1" &>/dev/null; }
 
-# ── Install Ollama ──
+# ── Install system build dependencies (Tauri requires these) ──
+install_system_deps() {
+  log "Checking system build dependencies..."
+
+  case "$OS_ID" in
+    ubuntu|debian|pop|linuxmint)
+      local missing=()
+      for pkg in libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev patchelf; do
+        if ! dpkg -s "$pkg" &>/dev/null; then
+          missing+=("$pkg")
+        fi
+      done
+      if [ ${#missing[@]} -gt 0 ]; then
+        log "Installing system libs: ${missing[*]}"
+        sudo apt-get update -qq
+        sudo apt-get install -y "${missing[@]}"
+      else
+        log "All system libs already installed."
+      fi
+      ;;
+    fedora|rhel|centos)
+      local missing=()
+      for pkg in webkit2gtk4.1-devel gtk3-devel libappindicator-gtk3-devel librsvg2-devel patchelf; do
+        if ! rpm -q "$pkg" &>/dev/null; then
+          missing+=("$pkg")
+        fi
+      done
+      if [ ${#missing[@]} -gt 0 ]; then
+        log "Installing system libs: ${missing[*]}"
+        sudo dnf install -y "${missing[@]}"
+      else
+        log "All system libs already installed."
+      fi
+      ;;
+    arch|manjaro)
+      log "Installing system libs via pacman..."
+      sudo pacman -S --needed --noconfirm webkit2gtk-4.1 gtk3 libappindicator-gtk3 librsvg patchelf
+      ;;
+    opensuse*)
+      log "Installing system libs via zypper..."
+      sudo zypper install -y webkit2gtk3-devel gtk3-devel libappindicator3-devel librsvg-devel patchelf
+      ;;
+    *)
+      warn "Unknown distro '$OS_ID'. Ensure webkit2gtk 4.1, GTK3, and librsvg are installed."
+      ;;
+  esac
+}
+
+# ── Install Rust (if missing) ──
+install_rust() {
+  if has rustc; then
+    log "Rust already installed: $(rustc --version)"
+    return 0
+  fi
+  log "Installing Rust via rustup..."
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+  source "$HOME/.cargo/env"
+  log "Rust installed: $(rustc --version)"
+}
+
+# ── Install Node.js (if missing) ──
+install_node() {
+  if has node && has npm; then
+    log "Node.js already installed: $(node --version)"
+    return 0
+  fi
+  log "Installing Node.js..."
+  case "$OS_ID" in
+    ubuntu|debian|pop|linuxmint)
+      curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+      sudo apt-get install -y nodejs
+      ;;
+    fedora|rhel|centos)
+      curl -fsSL https://rpm.nodesource.com/setup_22.x | sudo bash -
+      sudo dnf install -y nodejs
+      ;;
+    arch|manjaro)
+      sudo pacman -S --needed --noconfirm nodejs npm
+      ;;
+    *)
+      warn "Install Node.js 20+ manually: https://nodejs.org/"
+      return 1
+      ;;
+  esac
+  log "Node.js installed: $(node --version)"
+}
+
+# ── Install Tauri CLI ──
+install_tauri_cli() {
+  if has cargo-tauri; then
+    log "Tauri CLI already installed."
+    return 0
+  fi
+  log "Installing Tauri CLI..."
+  cargo install tauri-cli
+  log "Tauri CLI installed."
+}
+
+# ── Install Ollama (optional — local model hosting) ──
 install_ollama() {
   if has ollama; then
     log "Ollama already installed: $(ollama --version 2>/dev/null || echo 'found')"
     return 0
   fi
-  log "Installing Ollama..."
-  curl -fsSL https://ollama.com/install.sh | sh
-  log "Ollama installed."
+  warn "Ollama not found. It's optional — only needed for local model hosting."
+  read -p "Install Ollama? [y/N] " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    log "Installing Ollama..."
+    curl -fsSL https://ollama.com/install.sh | sh
+    log "Ollama installed."
+  else
+    warn "Skipping Ollama. You can use cloud models only."
+  fi
 }
 
 # ── Start Ollama service ──
 start_ollama() {
+  if ! has ollama; then return 0; fi
   if systemctl is-active ollama &>/dev/null; then
     log "Ollama service already running."
     return 0
@@ -63,16 +169,18 @@ start_ollama() {
   fi
 }
 
-# ── Pull default model ──
+# ── Pull default brain model (needs text + vision + tools) ──
 pull_default_model() {
-  local model="huihui_ai/qwen3.5-abliterated:9b-q8_0"
-  log "Checking for default model: $model"
-  if ollama list 2>/dev/null | grep -q "qwen3"; then
-    log "Qwen model already installed."
+  if ! has ollama; then return 0; fi
+  local model="qwen3.5:latest"
+  log "Checking for brain model (requires text + vision + tools capability)..."
+  if ollama list 2>/dev/null | grep -qE "qwen3|gemma4|llama-4"; then
+    log "Compatible brain model already installed."
     return 0
   fi
-  log "Pulling $model (this may take a few minutes)..."
-  ollama pull "$model" || warn "Failed to pull model. You can pull it later: ollama pull $model"
+  log "Pulling $model (text + vision + tools, 430K context)..."
+  log "This may take several minutes depending on your connection..."
+  ollama pull "$model" || warn "Failed to pull model. Install later: ollama pull $model"
 }
 
 # ── Install Python dependencies (ChromaDB + sentence-transformers) ──
@@ -139,12 +247,26 @@ setup_workspace() {
   mkdir -p "$MCP_HOME/logs"
   mkdir -p "$MCP_HOME/pipelines"
   mkdir -p "$MCP_HOME/agents"
+  mkdir -p "$MCP_HOME/checkpoints"
+  mkdir -p "$MCP_HOME/memories"
 
-  # Initialize ChromaDB with default collections
+  # Global memory stubs
+  if [ ! -f "$MCP_HOME/memories/MEMORY.md" ]; then
+    echo "# Shared Knowledge" > "$MCP_HOME/memories/MEMORY.md"
+    echo "" >> "$MCP_HOME/memories/MEMORY.md"
+    echo "_No shared memories yet._" >> "$MCP_HOME/memories/MEMORY.md"
+  fi
+  if [ ! -f "$MCP_HOME/memories/USER.md" ]; then
+    echo "# User Preferences" > "$MCP_HOME/memories/USER.md"
+    echo "" >> "$MCP_HOME/memories/USER.md"
+    echo "_No preferences recorded._" >> "$MCP_HOME/memories/USER.md"
+  fi
+
+  # Initialize ChromaDB with all required collections
   python3 -c "
 import chromadb
 client = chromadb.PersistentClient(path='$MCP_CHROMADB')
-for name in ['shared_knowledge', 'agent_knowledge']:
+for name in ['shared_knowledge', 'agent_knowledge', 'agent_scratchpad', 'agent_memory']:
     client.get_or_create_collection(name)
 print(f'ChromaDB initialized: {len(client.list_collections())} collections at $MCP_CHROMADB')
 " 2>/dev/null || warn "Could not initialize ChromaDB collections. Will be created on first agent run."
@@ -215,6 +337,32 @@ ENVELOPE
   log "Universal I/O envelope schema saved to $MCP_HOME/envelope-schema.json"
 }
 
+# ── Summary ──
+print_summary() {
+  echo ""
+  echo "================================================"
+  log "Setup complete!"
+  echo ""
+  echo "  Workspace:    $MCP_HOME"
+  echo "  ChromaDB:     $MCP_CHROMADB"
+  echo "  Agents:       $MCP_HOME/agents/"
+  echo "  Logs:         $MCP_HOME/logs/"
+  echo "  Checkpoints:  $MCP_HOME/checkpoints/"
+  echo "  Envelope:     $MCP_HOME/envelope-schema.json"
+  echo ""
+  echo "  Installed:"
+  has rustc   && echo "    Rust:      $(rustc --version)" || echo "    Rust:      not found"
+  has node    && echo "    Node.js:   $(node --version)"  || echo "    Node.js:   not found"
+  has ollama  && echo "    Ollama:    $(ollama --version 2>/dev/null || echo 'installed')" || echo "    Ollama:    not installed (optional)"
+  has hermes  && echo "    Hermes:    installed"          || echo "    Hermes:    not found"
+  has docker  && echo "    Docker:    $(docker --version 2>/dev/null | head -1)" || echo "    Docker:    not installed (optional)"
+  python3 -c "import chromadb" 2>/dev/null && echo "    ChromaDB:  installed" || echo "    ChromaDB:  not found"
+  echo ""
+  echo "  Build the app:  npm install && cargo tauri build --bundles deb"
+  echo "  Run the app:    multiclawprotocol"
+  echo ""
+}
+
 # ── Main ──
 main() {
   echo ""
@@ -224,32 +372,31 @@ main() {
 
   detect_os
 
-  # Core dependencies (required)
-  install_ollama
-  start_ollama
+  # System build deps (required for Tauri)
+  install_system_deps
+
+  # Build toolchain
+  install_rust
+  install_node
+  install_tauri_cli
+
+  # Core dependencies
   install_chromadb
   install_hermes
 
   # Optional
+  install_ollama
+  start_ollama
   install_docker
 
   # Workspace + Universal I/O
   setup_workspace
   setup_universal_io
 
-  # Pull default model (takes time, do last)
+  # Pull brain model last (takes time, optional)
   pull_default_model
 
-  echo ""
-  echo "================================================"
-  log "Setup complete!"
-  echo ""
-  echo "  Workspace:  $MCP_HOME"
-  echo "  ChromaDB:   $MCP_CHROMADB"
-  echo "  Envelope:   $MCP_HOME/envelope-schema.json"
-  echo ""
-  echo "  Run the app: multiclawprotocol"
-  echo ""
+  print_summary
 }
 
 main "$@"
