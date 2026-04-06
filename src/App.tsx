@@ -31,14 +31,9 @@ export default function App() {
     setAuthenticated(false);
   }, []);
 
-  const userEmail = (() => {
-    try {
-      const stored = localStorage.getItem("anvilbus-auth");
-      return stored ? JSON.parse(stored).email : null;
-    } catch {
-      return null;
-    }
-  })();
+  const handleSignIn = useCallback(() => {
+    setAuthenticated(false); // Show signup portal
+  }, []);
 
   // Load demo agents on mount
   useEffect(() => {
@@ -57,7 +52,8 @@ export default function App() {
           <TopNav
             currentPage={currentPage}
             onNavigate={setCurrentPage}
-            userEmail={userEmail}
+            isAuthenticated={authenticated}
+            onSignIn={handleSignIn}
             onSignOut={handleSignOut}
           />
 

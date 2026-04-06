@@ -3,7 +3,8 @@ import { ThemeToggle } from "./ThemeToggle";
 interface TopNavProps {
   currentPage: string;
   onNavigate: (page: string) => void;
-  userEmail: string | null;
+  isAuthenticated: boolean;
+  onSignIn: () => void;
   onSignOut: () => void;
 }
 
@@ -13,46 +14,41 @@ const PAGES = [
   { id: "settings", label: "Settings" },
 ];
 
+const brandFont = { fontFamily: "'Impact', 'Arial Black', sans-serif" };
+
 export function TopNav({
   currentPage,
   onNavigate,
-  userEmail,
+  isAuthenticated,
+  onSignIn,
   onSignOut,
 }: TopNavProps) {
   return (
     <nav className="flex items-center justify-between h-11 px-4 bg-[#0A0B0F] border-b border-gray-800/50 flex-none">
-      {/* Left: Brand + Auth */}
-      <div className="flex items-center gap-4">
-        <button
-          onClick={() => onNavigate("canvas")}
-          className="flex items-center hover:opacity-80 transition-opacity"
+      {/* Left: Brand */}
+      <button
+        onClick={() => onNavigate("canvas")}
+        className="flex items-center hover:opacity-80 transition-opacity"
+      >
+        <span
+          className="text-body-lg font-black tracking-tight text-gray-300"
+          style={brandFont}
         >
-          <span
-            className="text-body-lg font-black tracking-tight text-gray-300"
-            style={{ fontFamily: "'Impact', 'Arial Black', sans-serif" }}
-          >
-            MULTI
-          </span>
-          <span
-            className="text-body-lg font-black tracking-tight text-red-500"
-            style={{ fontFamily: "'Impact', 'Arial Black', sans-serif" }}
-          >
-            CLAW
-          </span>
-          <span
-            className="text-body-lg font-black tracking-tight text-gray-300"
-            style={{ fontFamily: "'Impact', 'Arial Black', sans-serif" }}
-          >
-            PROTOCOL
-          </span>
-        </button>
-
-        {userEmail && (
-          <span className="text-[0.65rem] text-gray-600 font-mono truncate max-w-[140px]">
-            {userEmail}
-          </span>
-        )}
-      </div>
+          MULTI
+        </span>
+        <span
+          className="text-body-lg font-black tracking-tight text-red-500"
+          style={brandFont}
+        >
+          CLAW
+        </span>
+        <span
+          className="text-body-lg font-black tracking-tight text-gray-300"
+          style={brandFont}
+        >
+          PROTOCOL
+        </span>
+      </button>
 
       {/* Center: Page tabs */}
       <div className="flex items-center gap-1 bg-[#0F1117] rounded-pill p-0.5">
@@ -71,15 +67,22 @@ export function TopNav({
         ))}
       </div>
 
-      {/* Right: Theme + Sign out */}
+      {/* Right: Theme + Auth */}
       <div className="flex items-center gap-3">
         <ThemeToggle />
-        {userEmail && (
+        {isAuthenticated ? (
           <button
             onClick={onSignOut}
-            className="text-caption text-gray-600 hover:text-gray-400 transition-colors"
+            className="px-3 py-1 text-caption font-medium rounded-pill border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 transition-colors"
           >
             Sign Out
+          </button>
+        ) : (
+          <button
+            onClick={onSignIn}
+            className="px-3 py-1 text-caption font-medium rounded-pill bg-[#1B3A6B] text-white hover:bg-[#1E40AF] transition-colors"
+          >
+            Sign In
           </button>
         )}
       </div>
