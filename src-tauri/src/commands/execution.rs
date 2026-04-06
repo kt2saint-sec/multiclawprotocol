@@ -9,6 +9,21 @@ use crate::engine::orchestrator::Orchestrator;
 use crate::engine::runner::RunnerConfig;
 use crate::engine::state_machine::{NodeState, PipelineRun, PipelineStatus};
 
+/// Validate a node_id or agent_id: 1-64 chars, alphanumeric/dash/underscore only.
+/// Rejects empty strings, oversized IDs, path separators, null bytes, and dots-dot sequences.
+fn validate_id(id: &str, field_name: &str) -> Result<(), String> {
+    if id.is_empty() || id.len() > 64 {
+        return Err(format!("{field_name} must be 1-64 characters"));
+    }
+    if id.contains('/') || id.contains("..") || id.contains('\0') {
+        return Err(format!("{field_name} contains invalid characters"));
+    }
+    if !id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_') {
+        return Err(format!("{field_name} must be alphanumeric, dash, or underscore"));
+    }
+    Ok(())
+}
+
 /// Shared execution state managed by Tauri
 pub struct ExecutionManager {
     pub current_run: Arc<Mutex<Option<Arc<Mutex<PipelineRun>>>>>,
@@ -82,6 +97,20 @@ pub async fn start_run(
                 return Err("A pipeline run is already in progress".to_string());
             }
         }
+    }
+
+    // Validate pipeline-level limits
+    if request.nodes.len() > 1000 {
+        return Err("Pipeline exceeds maximum of 1000 nodes".into());
+    }
+    if request.max_parallel > 100 {
+        return Err("max_parallel cannot exceed 100".into());
+    }
+
+    // Validate every node_id and agent_id before touching the filesystem
+    for node in &request.nodes {
+        validate_id(&node.id, "node_id")?;
+        validate_id(&node.agent_id, "agent_id")?;
     }
 
     let run_id = Uuid::new_v4().to_string();

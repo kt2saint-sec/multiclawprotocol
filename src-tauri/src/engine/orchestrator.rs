@@ -29,7 +29,7 @@ impl Orchestrator {
     pub fn new(app_handle: AppHandle, runner_config: RunnerConfig) -> Self {
         let db_path = runner_config
             .workspace_base
-            .join("anvilbus_checkpoints.db");
+            .join("mcp_checkpoints.db");
         Self {
             app_handle,
             runner: AgentRunner::new(runner_config),

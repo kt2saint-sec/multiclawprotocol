@@ -17,7 +17,7 @@ src-tauri/gen/
 *.p12
 
 # API keys stored locally
-anvilbus-api-keys.json
+mcp-api-keys.json
 
 # Database files (local runtime)
 *.db

@@ -14,6 +14,7 @@ import { NetworkGraph3D } from "./components/network/NetworkGraph3D";
 import { TerminalView } from "./components/terminal/TerminalView";
 import { LogViewerPage } from "./components/logs/LogViewerPage";
 import { FirstLaunchCheck } from "./components/setup/FirstLaunchCheck";
+import { HelpPage } from "./components/help/HelpPage";
 import { useExecutionEvents } from "./hooks/useExecutionEvents";
 import { useAgentRegistryStore } from "./stores/agentRegistryStore";
 import { DEMO_AGENTS } from "./data/demo-agents";
@@ -23,23 +24,23 @@ export default function App() {
   useExecutionEvents();
 
   const [setupDone, setSetupDone] = useState(() =>
-    Boolean(localStorage.getItem("anvilbus-setup-done")),
+    Boolean(localStorage.getItem("mcp-setup-done")),
   );
   const [authenticated, setAuthenticated] = useState(() =>
-    Boolean(localStorage.getItem("anvilbus-auth")),
+    Boolean(localStorage.getItem("mcp-auth")),
   );
   const [currentPage, setCurrentPage] = useState("canvas");
   const [inspectorOpen, setInspectorOpen] = useState(true);
 
   const handleSetupComplete = useCallback(() => {
-    localStorage.setItem("anvilbus-setup-done", "true");
+    localStorage.setItem("mcp-setup-done", "true");
     setSetupDone(true);
   }, []);
 
   const handleAuthenticated = useCallback(() => setAuthenticated(true), []);
 
   const handleSignOut = useCallback(() => {
-    localStorage.removeItem("anvilbus-auth");
+    localStorage.removeItem("mcp-auth");
     setAuthenticated(false);
   }, []);
 
@@ -127,6 +128,12 @@ export default function App() {
           {currentPage === "terminal" && (
             <div className="flex-1">
               <TerminalView />
+            </div>
+          )}
+
+          {currentPage === "help" && (
+            <div className="flex-1">
+              <HelpPage />
             </div>
           )}
         </div>

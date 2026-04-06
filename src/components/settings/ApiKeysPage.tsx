@@ -9,7 +9,7 @@ function ProfileSection() {
   useEffect(() => {
     void (() => {
       try {
-        const stored = localStorage.getItem("anvilbus-auth");
+        const stored = localStorage.getItem("mcp-auth");
         if (stored) {
           const data = JSON.parse(stored);
           setProfile({
@@ -27,11 +27,11 @@ function ProfileSection() {
 
   const saveName = () => {
     try {
-      const stored = localStorage.getItem("anvilbus-auth");
+      const stored = localStorage.getItem("mcp-auth");
       if (stored) {
         const data = JSON.parse(stored);
         data.name = editName;
-        localStorage.setItem("anvilbus-auth", JSON.stringify(data));
+        localStorage.setItem("mcp-auth", JSON.stringify(data));
         setProfile((p) => ({ ...p, name: editName }));
       }
     } catch {
@@ -214,7 +214,7 @@ const API_KEY_FIELDS: ApiKeyConfig[] = [
   },
 ];
 
-const STORAGE_KEY = "anvilbus-api-keys";
+const STORAGE_KEY = "mcp-api-keys";
 const MODEL_DISPLAY_LIMIT = 10;
 
 function formatSize(bytes: number): string {

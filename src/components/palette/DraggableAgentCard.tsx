@@ -62,7 +62,7 @@ export function DraggableAgentCard({ manifest }: DraggableAgentCardProps) {
   // ── Drag handler ─────────────────────────────────────────────────────────
   function onDragStart(e: React.DragEvent) {
     e.dataTransfer.setData(
-      "application/anvilbus-agent",
+      "application/multiclawprotocol-agent",
       JSON.stringify(manifest),
     );
     e.dataTransfer.effectAllowed = "move";

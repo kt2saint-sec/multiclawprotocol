@@ -1,7 +1,7 @@
 # <span style="color:white">MULTI</span><span style="color:red">CLAW</span><span style="color:white">PROTOCOL</span> — User Guide
 
 > **MULTI**<span style="color:red">**CLAW**</span>**PROTOCOL** — Visual AI Agent Pipeline Builder  
-> Version 0.4.0 | Built on Hermes Agent v0.7.0 + AnvilBus Platform  
+> Version 0.4.0 | Built on Hermes Agent v0.7.0 + MultiClawProtocol Platform  
 > 2026-04-06
 
 ---
@@ -72,7 +72,7 @@ Click **Continue Anyway** to skip non-critical failures. Affected features will 
 
 MultiClawProtocol supports two auth modes:
 
-1. **Local-only** — no account required. All config stored in `~/.anvilbus/`. Click **Continue Locally**.
+1. **Local-only** — no account required. All config stored in `~/.multiclawprotocol/`. Click **Continue Locally**.
 2. **Cloud sync** — sign up with email or GitHub OAuth. Pipelines and agent configs sync to your account.
 
 For most users, local-only is the right choice. Your API keys never leave the machine.
@@ -259,7 +259,7 @@ Supervisors trail the output quality of their assigned team in real time. They c
 
 ### What a SOUL.md Is
 
-Every agent has a `SOUL.md` file at `~/.anvilbus/agents/<agent-id>/SOUL.md`. It is plain markdown with three sections: Role, Goal, and Constraints. The execution engine injects the soul as the system prompt when the agent is invoked.
+Every agent has a `SOUL.md` file at `~/.multiclawprotocol/agents/<agent-id>/SOUL.md`. It is plain markdown with three sections: Role, Goal, and Constraints. The execution engine injects the soul as the system prompt when the agent is invoked.
 
 The soul is what makes an agent useful. The same underlying model behaves completely differently depending on the soul. You can give any agent any soul.
 
@@ -315,7 +315,7 @@ Customize any base agent into a specialist for your pipeline. Changes persist in
 4. **Config tab** — select model and isolation mode.
 5. **Soul tab** — rewrite Role, Goal, and Constraints for the new purpose.
 
-The customized agent is saved inside `~/.anvilbus/pipelines/<pipeline-id>.yaml` as a node-level soul override.
+The customized agent is saved inside `~/.multiclawprotocol/pipelines/<pipeline-id>.yaml` as a node-level soul override.
 
 **Tip:** Start from the agent whose team color matches your intent. BUILDER-derived agents for code tasks. INTEL-derived agents for research tasks. This keeps the visual layout semantically meaningful.
 
@@ -323,7 +323,7 @@ The customized agent is saved inside `~/.anvilbus/pipelines/<pipeline-id>.yaml` 
 
 ## 7. Settings Page
 
-Access via the gear icon in the sidebar. All settings stored locally in `~/.anvilbus/config.yaml`. Nothing sent to external servers.
+Access via the gear icon in the sidebar. All settings stored locally in `~/.multiclawprotocol/config.yaml`. Nothing sent to external servers.
 
 ### API Keys
 
@@ -338,7 +338,7 @@ Access via the gear icon in the sidebar. All settings stored locally in `~/.anvi
 | Ollama Host | URL | Default: `http://localhost:11434`. Change for remote Ollama. |
 | LiteLLM Proxy | URL | For self-hosted LiteLLM instances. |
 
-Keys are stored encrypted in `~/.anvilbus/config.yaml` and are never included in pipeline exports.
+Keys are stored encrypted in `~/.multiclawprotocol/config.yaml` and are never included in pipeline exports.
 
 ### Models
 
@@ -511,7 +511,7 @@ Enable **fallback to Claude via Meridian** in Settings > API Keys to route autom
 
 ## Appendix A: Pipeline File Format
 
-Pipelines save as YAML at `~/.anvilbus/pipelines/<pipeline-id>.yaml`. Human-readable and git-friendly.
+Pipelines save as YAML at `~/.multiclawprotocol/pipelines/<pipeline-id>.yaml`. Human-readable and git-friendly.
 
 ```yaml
 pipeline:
@@ -529,7 +529,7 @@ nodes:
       temperature: 0.7
       max_tokens: 4096
       isolation: subprocess
-    soul_override: null   # null = use default soul from ~/.anvilbus/agents/
+    soul_override: null   # null = use default soul from ~/.multiclawprotocol/agents/
 
   - id: node-2
     agent_id: intel
@@ -590,15 +590,15 @@ SENTINEL is the only agent that can trigger Level 2 and Level 3. No other agent 
 
 | Path | Contents |
 |------|----------|
-| `~/.anvilbus/` | Root config directory |
-| `~/.anvilbus/config.yaml` | API keys, model settings, user preferences |
-| `~/.anvilbus/agents/` | Base agent manifests and SOUL.md files |
-| `~/.anvilbus/pipelines/` | Saved pipeline YAML files |
-| `~/.anvilbus/logs/` | Session logs (rotated daily) |
-| `~/.anvilbus/checkpoints/` | Checkpoint state files for pipeline resume |
+| `~/.multiclawprotocol/` | Root config directory |
+| `~/.multiclawprotocol/config.yaml` | API keys, model settings, user preferences |
+| `~/.multiclawprotocol/agents/` | Base agent manifests and SOUL.md files |
+| `~/.multiclawprotocol/pipelines/` | Saved pipeline YAML files |
+| `~/.multiclawprotocol/logs/` | Session logs (rotated daily) |
+| `~/.multiclawprotocol/checkpoints/` | Checkpoint state files for pipeline resume |
 | `/mnt/nvme-fast/hermes-workspace/projects/` | Agent execution workspace (BUILDER writes here) |
 
 ---
 
 *MULTICLAW**PROTOCOL** v0.4.0 — 2026-04-06*  
-*Built on Hermes Agent v0.7.0 + AnvilBus Platform*
+*Built on Hermes Agent v0.7.0 + MultiClawProtocol Platform*

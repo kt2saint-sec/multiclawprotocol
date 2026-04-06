@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://anvilbus.dev/schemas/envelope/v1.json",
-  "title": "AnvilBus Universal I/O Envelope",
+  "$id": "https://multiclawprotocol.dev/schemas/envelope/v1.json",
+  "title": "MultiClawProtocol Universal I/O Envelope",
   "description": "Standard envelope passed between all agents in a pipeline",
   "type": "object",
   "required": ["version", "meta", "context", "payload", "status"],

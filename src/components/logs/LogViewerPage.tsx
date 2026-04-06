@@ -32,10 +32,12 @@ const SOURCE_COLORS: Record<string, string> = {
   docker: "text-amber-400",
 };
 
+// Log file paths — resolved at runtime via $HOME, no hardcoded user paths
+const HOME = typeof process !== "undefined" ? process.env.HOME : undefined;
 const LOG_PATHS = {
-  errors: `${import.meta.env.HOME || "/home/rebelsts"}/.hermes/logs/errors.log`,
-  tokens: `${import.meta.env.HOME || "/home/rebelsts"}/.hermes/logs/token_usage.jsonl`,
-  killswitch: `${import.meta.env.HOME || "/home/rebelsts"}/openclaw/logs/killswitch.log`,
+  errors: `${HOME || "~"}/.hermes/logs/errors.log`,
+  tokens: `${HOME || "~"}/.hermes/logs/token_usage.jsonl`,
+  killswitch: `${HOME || "~"}/.multiclawprotocol/logs/killswitch.log`,
 };
 
 const POLL_INTERVAL = 5000;

@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::path::Path;
+use log;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EnvelopeMeta {
@@ -94,16 +95,28 @@ pub struct UniversalEnvelope {
 impl UniversalEnvelope {
     /// Write envelope as JSON to a file in the workspace
     pub fn write_to_file(&self, workspace: &Path, filename: &str) -> Result<(), String> {
+        // Path traversal protection: reject any filename containing directory separators or
+        // dot-dot sequences that could escape the envelopes subdirectory.
+        if filename.contains('/') || filename.contains("..") || filename.contains('\\') {
+            return Err("Invalid filename: path traversal detected".to_string());
+        }
+
         let envelopes_dir = workspace.join("envelopes");
         std::fs::create_dir_all(&envelopes_dir)
-            .map_err(|e| format!("Failed to create envelopes dir: {e}"))?;
+            .map_err(|e| {
+                log::error!("Failed to create envelopes dir {}: {e}", envelopes_dir.display());
+                "Failed to create configuration directory".to_string()
+            })?;
 
         let path = envelopes_dir.join(filename);
         let json = serde_json::to_string_pretty(self)
             .map_err(|e| format!("Failed to serialize envelope: {e}"))?;
 
-        std::fs::write(&path, json)
-            .map_err(|e| format!("Failed to write envelope to {}: {e}", path.display()))?;
+        std::fs::write(&path, &json)
+            .map_err(|e| {
+                log::error!("Failed to write envelope to {}: {e}", path.display());
+                "Failed to write configuration file".to_string()
+            })?;
 
         Ok(())
     }
@@ -111,10 +124,16 @@ impl UniversalEnvelope {
     /// Read an envelope from a JSON file
     pub fn read_from_file(path: &Path) -> Result<Self, String> {
         let json = std::fs::read_to_string(path)
-            .map_err(|e| format!("Failed to read envelope from {}: {e}", path.display()))?;
+            .map_err(|e| {
+                log::error!("Failed to read envelope from {}: {e}", path.display());
+                "Failed to read configuration file".to_string()
+            })?;
 
         serde_json::from_str(&json)
-            .map_err(|e| format!("Failed to parse envelope from {}: {e}", path.display()))
+            .map_err(|e| {
+                log::error!("Failed to parse envelope from {}: {e}", path.display());
+                "Failed to parse configuration file".to_string()
+            })
     }
 
     /// Create an input envelope for a node

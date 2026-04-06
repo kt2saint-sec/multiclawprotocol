@@ -1,4 +1,4 @@
-# AnvilBus Model Router — LiteLLM Proxy Config
+# MultiClawProtocol Model Router — LiteLLM Proxy Config
 # Runtime: litellm --config router.yaml --port 4000
 
 model_list:

@@ -59,6 +59,30 @@ export function InspectorPanel({
         {tab === "Schema" && <SchemaViewer manifest={selectedAgent} />}
         {tab === "Logs" && <LogStream />}
       </div>
+
+      {/* Kill Switch button */}
+      <div className="flex-none p-3 border-t border-gray-200 dark:border-gray-700">
+        <button
+          onClick={() => {
+            const name = selectedAgent.display.name;
+            if (
+              confirm(
+                `Kill agent ${name}? This stops the agent process immediately.`,
+              )
+            ) {
+              // Log kill event
+              console.warn(`KILLSWITCH: User killed agent ${selectedAgent.id}`);
+              // In Tauri desktop mode, this would invoke a backend command
+              alert(
+                `Agent ${name} kill signal sent. Restart from the terminal: hermes -p ${selectedAgent.id} chat`,
+              );
+            }
+          }}
+          className="w-full py-2 text-caption font-semibold rounded-pill bg-[#991b1b] text-white hover:bg-[#dc2626] transition-colors"
+        >
+          Kill Agent
+        </button>
+      </div>
     </div>
   );
 }

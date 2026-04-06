@@ -17,17 +17,14 @@ pub struct RunnerConfig {
 
 impl Default for RunnerConfig {
     fn default() -> Self {
-        let workspace = std::env::var("OPENCLAW_WORKSPACE")
-            .map(PathBuf::from)
-            .unwrap_or_else(|_| {
-                dirs::data_local_dir()
-                    .unwrap_or_else(|| PathBuf::from("."))
-                    .join("multiclawprotocol")
-                    .join("runs")
-            });
         Self {
             hermes_bin: "hermes".to_string(),
-            workspace_base: workspace,
+            // Use the platform data directory so the path is portable across installs.
+            // Falls back to /tmp if the OS does not provide a data dir.
+            workspace_base: dirs::data_dir()
+                .unwrap_or_else(|| PathBuf::from("/tmp"))
+                .join("multiclawprotocol")
+                .join("runs"),
         }
     }
 }
@@ -110,9 +107,13 @@ impl AgentRunner {
         // Build the prompt that includes the envelope context
         let prompt = self.build_prompt(input_envelope, &workspace, node_id)?;
 
-        // Spawn hermes subprocess
+        // Spawn hermes subprocess in headless mode (no TTY, no prompt_toolkit)
         let mut child = Command::new(&self.config.hermes_bin)
             .args(["-p", agent_id, "chat", "-Q", "-q", &prompt])
+            .env("HERMES_NO_TTY", "1")
+            .env("TERM", "dumb")
+            .env("PYTHONUNBUFFERED", "1")
+            .stdin(Stdio::null())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .kill_on_drop(true)

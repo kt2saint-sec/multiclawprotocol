@@ -34,15 +34,168 @@ const WELCOME = `\x1b[1;31mMulti\x1b[0m\x1b[1;37mClaw\x1b[0m\x1b[1;31mProtocol\x
 
 `;
 
-/** Execute a command — tries Tauri shell first, falls back to simulated responses */
+// ── Terminal Sandbox: blocked commands and patterns ──
+const BLOCKED_COMMANDS = new Set([
+  // Shell escape / privilege escalation
+  "ssh",
+  "scp",
+  "sftp",
+  "sudo",
+  "su",
+  "doas",
+  "pkexec",
+  "passwd",
+  // Network tools
+  "nc",
+  "netcat",
+  "ncat",
+  "socat",
+  "telnet",
+  "ftp",
+  // Download / exfil
+  "wget",
+  "curl",
+  "aria2c",
+  // Destructive
+  "rm",
+  "shred",
+  "dd",
+  "mkfs",
+  "fdisk",
+  "parted",
+  "wipefs",
+  // Security / hacking tools
+  "john",
+  "hashcat",
+  "hydra",
+  "nmap",
+  "nikto",
+  "sqlmap",
+  "metasploit",
+  "msfconsole",
+  "msfvenom",
+  "aircrack-ng",
+  "airmon-ng",
+  "burpsuite",
+  "gobuster",
+  "dirb",
+  "wfuzz",
+  "ffuf",
+  "masscan",
+  "zmap",
+  // Proxy / tunnel tools
+  "cloudflared",
+  "warp-cli",
+  "dante",
+  "proxychains",
+  "proxychains4",
+  "tor",
+  "torsocks",
+  "i2p",
+  "ngrok",
+  "localtunnel",
+  "lt",
+  // VM / container escape
+  "qemu",
+  "virtualbox",
+  "vboxmanage",
+  "vagrant",
+  "lxc",
+  "lxd",
+  "virsh",
+  "docker",
+  "podman",
+  "containerd",
+  "ctr",
+  "nerdctl",
+  // DoS / DDoS tools
+  "hping3",
+  "slowloris",
+  "loic",
+  "goldeneye",
+  "hulk",
+  // Database direct access
+  "psql",
+  "mysql",
+  "mongo",
+  "mongosh",
+  "redis-cli",
+  "sqlite3",
+  // Supabase CLI
+  "supabase",
+  "npx",
+  // Recon
+  "shodan",
+  "censys",
+  "theHarvester",
+  "recon-ng",
+  "maltego",
+  // Package managers (prevent installing tools)
+  "apt",
+  "apt-get",
+  "dpkg",
+  "yum",
+  "dnf",
+  "pacman",
+  "snap",
+  "flatpak",
+  "pip",
+  "pip3",
+  "npm",
+  "yarn",
+  "pnpm",
+  "cargo",
+  "go",
+]);
+
+const BLOCKED_PATTERNS = [
+  /rm\s+(-[rf]+\s+)?\//, // rm -rf /
+  />\s*\/dev\//, // write to devices
+  /\/etc\/(passwd|shadow|sudoers)/, // sensitive system files
+  /\.ssh\//, // SSH directory
+  /\.gnupg\//, // GPG keys
+  /supabase\.co/, // Supabase project URL
+  /wmsodwmjjnxfvfwlzpyf/, // Supabase project ID
+  /127\.0\.0\.1|0\.0\.0\.0|::1/, // localhost bypass attempts (except configured services)
+  /192\.168\.|10\.\d+\.|172\.(1[6-9]|2\d|3[01])\./, // internal network
+  /\|\s*(sh|bash|zsh|fish|csh)/, // pipe to shell
+  /`.*`/, // backtick command substitution
+  /\$\(.*\)/, // $() command substitution
+  /;\s*(sh|bash|sudo|rm|wget|curl)/, // command chaining to dangerous commands
+];
+
+function isCommandBlocked(cmd: string): string | null {
+  const lower = cmd.toLowerCase();
+  const firstWord = lower.split(/\s+/)[0];
+
+  // Check exact command match
+  if (BLOCKED_COMMANDS.has(firstWord)) {
+    return `\x1b[31mBlocked:\x1b[0m \x1b[1m${firstWord}\x1b[0m is not allowed in the sandbox.\n\x1b[90mMultiClawProtocol terminal is restricted to safe operations only.\x1b[0m\n`;
+  }
+
+  // Check pattern match
+  for (const pattern of BLOCKED_PATTERNS) {
+    if (pattern.test(lower)) {
+      return `\x1b[31mBlocked:\x1b[0m command matches a restricted pattern.\n\x1b[90mThis operation is not permitted in the sandbox.\x1b[0m\n`;
+    }
+  }
+
+  return null; // Command is allowed
+}
+
+/** Execute a command — sandboxed with blocklist */
 async function executeCommand(cmd: string): Promise<string> {
   const trimmed = cmd.trim();
   if (!trimmed) return "";
 
-  // Tauri shell support: when running as desktop app, real PTY will be wired here.
-  // For now, all commands are handled by the browser-side command router below.
+  // ── Sandbox: check blocklist before ANY execution ──
+  const blocked = isCommandBlocked(trimmed);
+  if (blocked) return blocked;
 
-  // Browser fallback — handle common commands locally
+  // Tauri shell support: when running as desktop app, real PTY will be wired here.
+  // All commands are scoped to ~/.multiclawprotocol/ workspace.
+
+  // Command router — whitelisted commands only
   if (trimmed === "help") {
     return [
       "\x1b[1mAvailable commands:\x1b[0m",
@@ -53,14 +206,99 @@ async function executeCommand(cmd: string): Promise<string> {
       "  clear              — Clear terminal",
       "  help               — Show this help",
       "",
-      "\x1b[90mOther commands are forwarded to local services when available.\x1b[0m",
+      "\x1b[1mHelp topics:\x1b[0m",
+      "  help tutorial       — Quick-start guide (4 steps)",
+      "  help agents         — Agent teams overview",
+      "  help models         — Model routing & pricing",
+      "  help keys           — API key setup",
+      "  help souls          — Editing agent personalities",
+      "",
+      "\x1b[90mOr click the Help tab in the top navigation.\x1b[0m",
+      "",
+    ].join("\n");
+  }
+
+  if (trimmed === "help tutorial") {
+    return [
+      "\x1b[1;31mMulti\x1b[0m\x1b[1;37mClaw\x1b[0m\x1b[1;31mProtocol\x1b[0m — Quick Start",
+      "",
+      "\x1b[1;32m Step 1:\x1b[0m Drag an agent from the bottom bar onto the canvas",
+      "\x1b[1;32m Step 2:\x1b[0m Drag a second agent. Connect: green handle → blue handle",
+      "\x1b[1;32m Step 3:\x1b[0m Click a node → Inspector opens. Edit model, soul, tools",
+      "\x1b[1;32m Step 4:\x1b[0m Click \x1b[32m▶ Run\x1b[0m (green, bottom-left) to execute",
+      "",
+      "\x1b[90mAutonomy modes: Manual (approve each step) | Auto (run all) | Checkpoint (save state)\x1b[0m",
+      "",
+    ].join("\n");
+  }
+
+  if (trimmed === "help agents") {
+    return [
+      "\x1b[1m18 Base Agents in 3 Teams + Solo + Supervisors:\x1b[0m",
+      "",
+      "\x1b[34m  The Brain (blue)\x1b[0m   STRATEGIST, INTEL, LEGAL-EXPERT",
+      "\x1b[32m  The Forge (green)\x1b[0m  CODEREVIEW, BUILDER, BORIS, GITHUB-SCOUT",
+      "\x1b[33m  The Hustle (amber)\x1b[0m SALES&CLOSER, MARKETER, DTF-EXPERT",
+      "\x1b[35m  Solo (purple)\x1b[0m      ORCHESTRATOR, PROXY, SENTINEL, DESIGNER, SPEC-LOADER",
+      "\x1b[31m  Supervisors (red)\x1b[0m  BRAIN-SUPERVISOR, FORGE-SUPERVISOR, HUSTLE-SUPERVISOR",
+      "",
+    ].join("\n");
+  }
+
+  if (trimmed === "help models") {
+    return [
+      "\x1b[1mModel Routing Table:\x1b[0m",
+      "",
+      "  \x1b[32mFree\x1b[0m      Qwen 3.6+              \x1b[36m$0/$0\x1b[0m",
+      "  \x1b[32mFree\x1b[0m      Gemma 4 26B (Ollama)    \x1b[36m$0/$0\x1b[0m",
+      "  \x1b[33mBudget\x1b[0m    Qwen3 32B              \x1b[36m$0.08/$0.24\x1b[0m",
+      "  \x1b[33mBudget\x1b[0m    Gemma 4 26B            \x1b[36m$0.13/$0.40\x1b[0m",
+      "  \x1b[33mMid\x1b[0m       DeepSeek V3.2          \x1b[36m$0.28/$0.42\x1b[0m",
+      "  \x1b[35mPremium\x1b[0m   GLM 5V Turbo           \x1b[36m$1.20/$4.00\x1b[0m",
+      "  \x1b[31mElite\x1b[0m     Claude Sonnet 4.5      \x1b[36m$3/$15\x1b[0m",
+      "",
+      "\x1b[90mChange model: click agent → Config tab → Model dropdown\x1b[0m",
+      "",
+    ].join("\n");
+  }
+
+  if (trimmed === "help keys") {
+    return [
+      "\x1b[1mAPI Key Setup:\x1b[0m",
+      "",
+      "  Go to \x1b[1mSettings\x1b[0m tab → API Keys section",
+      "",
+      "  Supported providers:",
+      "  • OpenRouter (3 key pools, round-robin)",
+      "  • Anthropic (Claude models)",
+      "  • OpenAI, Google AI, Grok (xAI), Mistral",
+      "  • Ollama Host (default: localhost:11434)",
+      "  • LiteLLM Proxy (default: localhost:4000)",
+      "",
+      "\x1b[90mKeys stored locally — never sent to external servers.\x1b[0m",
+      "",
+    ].join("\n");
+  }
+
+  if (trimmed === "help souls") {
+    return [
+      "\x1b[1mEditing Agent Souls:\x1b[0m",
+      "",
+      "  A SOUL.md defines the agent's personality (system prompt).",
+      "",
+      "  To edit: click agent on canvas → \x1b[1mSoul\x1b[0m tab in Inspector",
+      "  • \x1b[1mRole\x1b[0m — the agent's job title and identity",
+      "  • \x1b[1mGoal\x1b[0m — what the agent is trying to achieve",
+      "  • \x1b[1mConstraints\x1b[0m — hard rules, one per line",
+      "",
+      "  Changes save automatically when you click away.",
       "",
     ].join("\n");
   }
 
   if (trimmed === "agents") {
     try {
-      const stored = localStorage.getItem("anvilbus-agent-registry");
+      const stored = localStorage.getItem("mcp-agent-registry");
       if (stored) {
         const data = JSON.parse(stored);
         const agents = Object.values(data.state?.agents || {}) as Array<{

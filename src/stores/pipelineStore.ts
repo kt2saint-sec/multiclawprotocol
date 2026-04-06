@@ -78,7 +78,7 @@ export const usePipelineStore = create<PipelineState>()(
       reset: () => set({ pipeline: null, isDirty: false, lastSavedAt: null }),
     }),
     {
-      name: 'anvilbus-pipeline',
+      name: 'mcp-pipeline',
       partialize: (state) => ({ pipeline: state.pipeline, lastSavedAt: state.lastSavedAt }),
     }
   )

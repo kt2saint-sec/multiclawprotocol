@@ -48,7 +48,7 @@ export function SignupPortal({ onAuthenticated }: SignupPortalProps) {
           if (signInError) throw signInError;
         }
         localStorage.setItem(
-          "anvilbus-auth",
+          "mcp-auth",
           JSON.stringify({
             email,
             name: name || email.split("@")[0],
@@ -65,7 +65,7 @@ export function SignupPortal({ onAuthenticated }: SignupPortalProps) {
       // Local-only mode (no Supabase configured)
       await new Promise((r) => setTimeout(r, 400));
       localStorage.setItem(
-        "anvilbus-auth",
+        "mcp-auth",
         JSON.stringify({
           email,
           name: name || email.split("@")[0],
@@ -92,15 +92,12 @@ export function SignupPortal({ onAuthenticated }: SignupPortalProps) {
       <div className="relative z-10 w-full max-w-md px-6">
         {/* Logo / Brand */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#1A1C24] border border-gray-700/50 mb-4">
-            <span className="text-2xl font-bold bg-gradient-to-br from-[#1B3A6B] to-[#7dd3fc] bg-clip-text text-transparent">
-              AB
-            </span>
-          </div>
-          <h1 className="text-display-sm font-bold text-white tracking-tight">
-            AnvilBus
-          </h1>
-          <p className="text-body-sm text-gray-500 mt-1">
+          <img
+            src="/logos/logo-portal.png"
+            alt="MultiClawProtocol"
+            className="h-12 mx-auto mb-4"
+          />
+          <p className="text-body-sm text-gray-500">
             Visual Agent Orchestration Platform
           </p>
         </div>
@@ -142,7 +139,7 @@ export function SignupPortal({ onAuthenticated }: SignupPortalProps) {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Ghost"
+                  placeholder="Your name"
                   className="w-full px-4 py-2.5 rounded-node bg-[#0F1117] border border-gray-700/50 text-body-sm text-white placeholder-gray-600 focus:border-[#1B3A6B] focus:ring-1 focus:ring-[#1B3A6B] outline-none transition-colors"
                 />
               </div>
@@ -157,7 +154,7 @@ export function SignupPortal({ onAuthenticated }: SignupPortalProps) {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="ghost@openclaw.io"
+                placeholder="you@example.com"
                 className="w-full px-4 py-2.5 rounded-node bg-[#0F1117] border border-gray-700/50 text-body-sm text-white placeholder-gray-600 focus:border-[#1B3A6B] focus:ring-1 focus:ring-[#1B3A6B] outline-none transition-colors"
               />
             </div>
@@ -224,7 +221,7 @@ export function SignupPortal({ onAuthenticated }: SignupPortalProps) {
 
         {/* Footer */}
         <p className="text-center text-caption text-gray-600 mt-6">
-          By continuing, you agree to AnvilBus Terms of Service
+          By continuing, you agree to MultiClawProtocol Terms of Service
         </p>
       </div>
     </div>

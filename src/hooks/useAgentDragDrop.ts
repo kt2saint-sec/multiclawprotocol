@@ -13,7 +13,7 @@ export function useAgentDragDrop() {
   const onDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault();
-      const raw = event.dataTransfer.getData("application/anvilbus-agent");
+      const raw = event.dataTransfer.getData("application/multiclawprotocol-agent");
       if (!raw) return;
 
       const manifest: AgentManifest = JSON.parse(raw);

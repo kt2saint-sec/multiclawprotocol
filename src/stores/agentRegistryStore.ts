@@ -75,7 +75,7 @@ export const useAgentRegistryStore = create<AgentRegistryState>()(
         }),
     }),
     {
-      name: "anvilbus-agent-registry",
+      name: "mcp-agent-registry",
       partialize: (state) => ({
         agents: state.agents,
         lastLoadedAt: state.lastLoadedAt,

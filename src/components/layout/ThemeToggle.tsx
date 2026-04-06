@@ -1,22 +1,24 @@
-import { useEffect, type ReactNode } from 'react'
-import { useThemeStore } from '../../stores/themeStore'
+import { useEffect, type ReactNode } from "react";
+import { useThemeStore } from "../../stores/themeStore";
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const isDark = useThemeStore((s) => s.isDark)
+  const isDark = useThemeStore((s) => s.isDark);
 
   useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
+    // Dark mode is the primary design — always ensure dark class is present
+    // Light mode support is planned but not production-ready
+    document.documentElement.classList.add("dark");
+    if (!isDark) {
+      // Future: remove 'dark' class when light mode is fully implemented
+      // document.documentElement.classList.remove('dark')
     }
-  }, [isDark])
+  }, [isDark]);
 
-  return <>{children}</>
+  return <>{children}</>;
 }
 
 export function ThemeToggle() {
-  const { isDark, toggle } = useThemeStore()
+  const { isDark, toggle } = useThemeStore();
 
   return (
     <button
@@ -24,7 +26,7 @@ export function ThemeToggle() {
       className="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm"
       aria-label="Toggle theme"
     >
-      {isDark ? '☀️' : '🌙'}
+      {isDark ? "☀️" : "🌙"}
     </button>
-  )
+  );
 }

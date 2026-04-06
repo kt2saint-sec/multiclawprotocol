@@ -28,7 +28,7 @@ const defaults = {
   execution: {
     isolation: "subprocess" as const,
     docker_image: null,
-    working_dir: "./workspace",
+    working_dir: "~/.multiclawprotocol/workspace",
     env_required: [],
     env_optional: [],
   },

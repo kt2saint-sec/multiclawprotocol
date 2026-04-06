@@ -1,15 +1,15 @@
-# AnvilBus: Complete Architecture for Visual Agent Orchestration
+# MultiClawProtocol: Complete Architecture for Visual Agent Orchestration
 
-**AnvilBus is a local-first visual agent orchestration platform that chains 14 AI agents through drag-and-drop pipelines, backed by a persistent Hermes brain with RAG memory and a LiteLLM-powered model router spanning local Ollama and cloud providers — all within a Tauri desktop app costing under $12/month.** This specification delivers eight complete, implementable design documents: agent manifest schema, pipeline definition format, a demo storefront pipeline, React Flow canvas UI, Tauri project scaffold, Tailwind design system, model router config, and execution engine architecture. Every spec is YAML-serializable, git-friendly, and framework-agnostic — designed so a solo developer on a Ryzen 9 9950X with 24GB VRAM can run the entire stack locally.
+**MultiClawProtocol is a local-first visual agent orchestration platform that chains 14 AI agents through drag-and-drop pipelines, backed by a persistent Hermes brain with RAG memory and a LiteLLM-powered model router spanning local Ollama and cloud providers — all within a Tauri desktop app costing under $12/month.** This specification delivers eight complete, implementable design documents: agent manifest schema, pipeline definition format, a demo storefront pipeline, React Flow canvas UI, Tauri project scaffold, Tailwind design system, model router config, and execution engine architecture. Every spec is YAML-serializable, git-friendly, and framework-agnostic — designed so a solo developer on a Ryzen 9 9950X with 24GB VRAM can run the entire stack locally.
 
 ---
 
 ## 1. Agent manifest spec defines every pluggable agent
 
-The `agent.yaml` manifest draws from CrewAI's YAML-first role/goal/backstory pattern, LangGraph's typed state schemas with reducers, OpenAI's structured tool definitions, and DSPy's typed signature approach. Every agent in `~/.anvilbus/agents/<agent-id>/` contains this file alongside its `SOUL.md` and `tools.json`.
+The `agent.yaml` manifest draws from CrewAI's YAML-first role/goal/backstory pattern, LangGraph's typed state schemas with reducers, OpenAI's structured tool definitions, and DSPy's typed signature approach. Every agent in `~/.multiclawprotocol/agents/<agent-id>/` contains this file alongside its `SOUL.md` and `tools.json`.
 
 ```yaml
-# ~/.anvilbus/agents/researcher/agent.yaml
+# ~/.multiclawprotocol/agents/researcher/agent.yaml
 # Agent Manifest Specification v1.0.0
 # Compatible with: Hermes, CrewAI, LangGraph, AutoGen
 
@@ -193,7 +193,7 @@ agent:
 The `pipeline.yaml` format synthesizes patterns from **GitHub Actions** (needs/if/matrix), **Argo Workflows** (DAG tasks, suspend templates, when expressions), **Tekton** (typed params/results), and **Kubeflow** (typed I/O with compile-time validation). Every inter-node message wraps in the existing Universal I/O Envelope.
 
 ```yaml
-# ~/.anvilbus/pipelines/storefront-build.yaml
+# ~/.multiclawprotocol/pipelines/storefront-build.yaml
 pipeline:
   id: "pln_storefront_build"
   name: "Modern Storefront Builder"
@@ -201,7 +201,7 @@ pipeline:
   description: >
     End-to-end pipeline that designs, builds, tests, and reviews
     a Tauri + React + Tailwind e-commerce storefront application.
-  author: "anvilbus-user"
+  author: "multiclawprotocol-user"
   tags: ["frontend", "e-commerce", "tauri"]
   created: "2026-04-06T00:00:00Z"
 
@@ -578,7 +578,7 @@ The store separates **flow state** (nodes, edges, viewport — managed by React 
 ## 5. Tauri project structure organizes Rust backend and React frontend
 
 ```
-anvilbus/
+multiclawprotocol/
 ├── src-tauri/                            # Rust backend
 │   ├── Cargo.toml
 │   ├── tauri.conf.json                   # Window config, app identifier
@@ -679,7 +679,7 @@ anvilbus/
 └── README.md
 ```
 
-**Tauri capabilities** in `src-tauri/capabilities/default.json` must explicitly grant: `fs:allow-read-text-file`, `fs:allow-write-text-file` (scoped to `~/.anvilbus/`), `shell:allow-execute` for `docker` and `ollama` binaries, and `dialog:allow-open` for file picker access. The Tauri v2 API uses `@tauri-apps/api/core` for `invoke()` and `@tauri-apps/api/event` for `listen()` — different import paths from v1. Communication between the Rust execution engine and React UI flows through **Tauri events**: the engine emits `node-started`, `node-completed`, `cost-update`, and `hitl-request` events that the frontend consumes via `useExecutionStream`.
+**Tauri capabilities** in `src-tauri/capabilities/default.json` must explicitly grant: `fs:allow-read-text-file`, `fs:allow-write-text-file` (scoped to `~/.multiclawprotocol/`), `shell:allow-execute` for `docker` and `ollama` binaries, and `dialog:allow-open` for file picker access. The Tauri v2 API uses `@tauri-apps/api/core` for `invoke()` and `@tauri-apps/api/event` for `listen()` — different import paths from v1. Communication between the Rust execution engine and React UI flows through **Tauri events**: the engine emits `node-started`, `node-completed`, `cost-update`, and `hitl-request` events that the frontend consumes via `useExecutionStream`.
 
 ---
 
@@ -888,7 +888,7 @@ export default config
 The router runs as a LiteLLM proxy on `localhost:4000`, providing an OpenAI-compatible API that all agents call regardless of which provider ultimately serves the request. On a **24GB VRAM 7900 XTX**, only one 26-32B model fits at a time — the router handles model swapping via Ollama's `keep_alive` parameter.
 
 ```yaml
-# ~/.anvilbus/config/router.yaml
+# ~/.multiclawprotocol/config/router.yaml
 # Runtime: litellm --config router.yaml --port 4000
 
 model_list:
@@ -1119,7 +1119,7 @@ agent_{id}_memory          ← Single agent R/W (persistent episodic memory)
 agent_{id}_scratchpad      ← Single agent R/W (cleared per pipeline run)
 ```
 
-ChromaDB runs as a **PersistentClient** at `~/.anvilbus/chromadb/` using `all-MiniLM-L6-v2` for local embeddings (384 dimensions, no API calls). Each agent declares which collections it can read/write in its `agent.yaml` memory config. The orchestrator enforces these permissions — a RESEARCHER agent cannot write to BUILDER's private memory collection.
+ChromaDB runs as a **PersistentClient** at `~/.multiclawprotocol/chromadb/` using `all-MiniLM-L6-v2` for local embeddings (384 dimensions, no API calls). Each agent declares which collections it can read/write in its `agent.yaml` memory config. The orchestrator enforces these permissions — a RESEARCHER agent cannot write to BUILDER's private memory collection.
 
 ---
 
@@ -1129,7 +1129,7 @@ The build order reflects strict dependencies. Each phase unlocks the next.
 
 **Phase 1 — Foundation (Week 1-2):** Set up the Tauri + React + Vite project scaffold. Install `@xyflow/react`, Zustand, `js-yaml`, Tailwind. Implement the `tailwind.config.ts` with the full design system. Build the `AppLayout` grid with placeholder panels. Create the Zustand stores (flow, pipeline, theme). Implement YAML serialization for agent manifests and pipelines. Write the TypeScript types for `AgentManifest`, `PipelineDefinition`, and `UniversalEnvelope`.
 
-**Phase 2 — Canvas Core (Week 3-4):** Build the `AgentNode` custom React Flow component with collapse/expand. Implement `HandleGroup` with typed handles. Wire up `isValidConnection` for payload type checking. Build `AgentPalette` with HTML DnD producing nodes on the canvas. Implement `InspectorPanel` with config form and SOUL.md editor. Add pipeline save/load via Tauri fs plugin (YAML read/write to `~/.anvilbus/`).
+**Phase 2 — Canvas Core (Week 3-4):** Build the `AgentNode` custom React Flow component with collapse/expand. Implement `HandleGroup` with typed handles. Wire up `isValidConnection` for payload type checking. Build `AgentPalette` with HTML DnD producing nodes on the canvas. Implement `InspectorPanel` with config form and SOUL.md editor. Add pipeline save/load via Tauri fs plugin (YAML read/write to `~/.multiclawprotocol/`).
 
 **Phase 3 — Model Router (Week 5):** Deploy LiteLLM proxy with the `router.yaml` config. Verify Ollama local models work through the proxy. Test fallback chains (kill Ollama, verify cloud fallback). Build the Tauri `models.rs` command module for health checks and model warm-up. Wire StatusBar to show Ollama health and loaded model.
 

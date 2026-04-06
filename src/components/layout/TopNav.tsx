@@ -14,9 +14,8 @@ const PAGES = [
   { id: "terminal", label: "Terminal" },
   { id: "logs", label: "Logs" },
   { id: "settings", label: "Settings" },
+  { id: "help", label: "Help" },
 ];
-
-const brandFont = { fontFamily: "'Impact', 'Arial Black', sans-serif" };
 
 export function TopNav({
   currentPage,
@@ -27,29 +26,16 @@ export function TopNav({
 }: TopNavProps) {
   return (
     <nav className="flex items-center justify-between h-11 px-4 bg-[#0A0B0F] border-b border-gray-800/50 flex-none">
-      {/* Left: Brand */}
+      {/* Left: Brand logo */}
       <button
         onClick={() => onNavigate("canvas")}
         className="flex items-center hover:opacity-80 transition-opacity"
       >
-        <span
-          className="text-body-lg font-black tracking-tight text-gray-300"
-          style={brandFont}
-        >
-          MULTI
-        </span>
-        <span
-          className="text-body-lg font-black tracking-tight text-red-500"
-          style={brandFont}
-        >
-          CLAW
-        </span>
-        <span
-          className="text-body-lg font-black tracking-tight text-gray-300"
-          style={brandFont}
-        >
-          PROTOCOL
-        </span>
+        <img
+          src="/logos/logo-nav.png"
+          alt="MultiClawProtocol"
+          className="h-7"
+        />
       </button>
 
       {/* Center: Page tabs */}

@@ -29,7 +29,7 @@ pipeline:
   nodes:
     - id: n1-research
       name: "Market Research"
-      agent_ref: researcher
+      agent_ref: intel
       inputs:
         - { name: store_type, type: string, source: "$params.store_type" }
       outputs:
@@ -89,7 +89,7 @@ pipeline:
 
     - id: n6-hitl
       name: "Human Approval"
-      agent_ref: hitl-gate
+      agent_ref: proxy
       inputs:
         - { name: qa, type: object, source: "$nodes.n4-boris.qa_report" }
         - { name: review, type: object, source: "$nodes.n5-codereview.review" }
