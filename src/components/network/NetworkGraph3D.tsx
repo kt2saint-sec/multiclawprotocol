@@ -438,6 +438,57 @@ export function NetworkGraph3D() {
         Drag to rotate · Scroll to zoom
       </div>
 
+      {/* Permissions legend — right side */}
+      <div className="absolute top-12 right-4 bg-[#0F1117]/80 backdrop-blur rounded-node border border-gray-700/50 px-4 py-3 w-[200px]">
+        <p className="text-[0.65rem] font-bold text-gray-300 tracking-widest uppercase mb-2">
+          Team Permissions
+        </p>
+        <div className="space-y-2">
+          {[
+            {
+              color: "#1B3A6B",
+              team: "Brain",
+              perms: "Research, planning, strategy, memory read/write",
+            },
+            {
+              color: "#1A5632",
+              team: "Forge",
+              perms: "Code execution, file write, Docker, shell access",
+            },
+            {
+              color: "#FFB347",
+              team: "Hustle",
+              perms: "Web access, API calls, external services",
+            },
+            {
+              color: "#6B21A8",
+              team: "Solo",
+              perms: "Scoped tools only, no shared memory write",
+            },
+            {
+              color: "#DC2626",
+              team: "Supervisors",
+              perms: "Full read, revision authority, quality gate",
+            },
+          ].map((t) => (
+            <div key={t.team} className="flex gap-2">
+              <span
+                className="w-2.5 h-2.5 rounded-full flex-none mt-0.5"
+                style={{ background: t.color }}
+              />
+              <div>
+                <span className="text-[0.65rem] font-semibold text-gray-300">
+                  {t.team}
+                </span>
+                <p className="text-[0.55rem] text-gray-500 leading-tight">
+                  {t.perms}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Hovered agent info panel */}
       {hoveredNode && hoveredNodeData && (
         <div className="absolute top-4 left-4 bg-[#1A1C24] border border-gray-700/50 rounded-node px-4 py-3 shadow-lg">

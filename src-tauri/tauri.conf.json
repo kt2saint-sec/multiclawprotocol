@@ -23,7 +23,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' http://localhost:* https://*.supabase.co https://api.openrouter.ai https://api.anthropic.com https://api.openai.com https://generativelanguage.googleapis.com"
+      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' ipc://localhost http://localhost:* https://*.supabase.co https://api.openrouter.ai https://api.anthropic.com https://api.openai.com https://generativelanguage.googleapis.com"
     }
   },
   "bundle": {
