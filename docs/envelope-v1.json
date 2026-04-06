@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anvilbus.dev/schemas/envelope/v1.json",
+  "title": "AnvilBus Universal I/O Envelope",
+  "description": "Standard envelope passed between all agents in a pipeline",
+  "type": "object",
+  "required": ["version", "meta", "context", "payload", "status"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Envelope schema version for forward compatibility"
+    },
+    "meta": {
+      "type": "object",
+      "required": ["pipeline_id", "run_id", "node_id", "timestamp"],
+      "properties": {
+        "pipeline_id": {
+          "type": "string",
+          "description": "Stable ID of the pipeline definition"
+        },
+        "run_id": {
+          "type": "string",
+          "description": "Unique ID for this specific execution"
+        },
+        "node_id": {
+          "type": "string",
+          "description": "ID of the agent node that produced this envelope"
+        },
+        "parent_node_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Upstream nodes whose outputs fed this one"
+        },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "agent_id": {
+          "type": "string",
+          "description": "The agent that produced this envelope"
+        },
+        "agent_version": { "type": "string" },
+        "model_used": { "type": "string", "description": "Full model string" },
+        "cost_usd": { "type": "number", "minimum": 0 },
+        "tokens": {
+          "type": "object",
+          "properties": {
+            "input": { "type": "integer" },
+            "output": { "type": "integer" },
+            "cached": { "type": "integer" }
+          }
+        },
+        "duration_ms": { "type": "integer" }
+      }
+    },
+    "context": {
+      "type": "object",
+      "required": ["task"],
+      "properties": {
+        "task": {
+          "type": "string",
+          "description": "Original high-level goal the pipeline is working toward"
+        },
+        "user_intent": {
+          "type": "string",
+          "description": "Clarification of what the user ultimately wants"
+        },
+        "history": {
+          "type": "array",
+          "description": "Condensed trail of upstream agent outputs",
+          "items": {
+            "type": "object",
+            "required": ["node_id", "agent_id", "summary"],
+            "properties": {
+              "node_id": { "type": "string" },
+              "agent_id": { "type": "string" },
+              "summary": { "type": "string" },
+              "payload_type": { "type": "string" }
+            }
+          }
+        },
+        "constraints": {
+          "type": "object",
+          "properties": {
+            "budget_usd": { "type": "number" },
+            "deadline": { "type": "string", "format": "date-time" },
+            "forbidden_actions": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "required": ["type", "content"],
+      "properties": {
+        "type": { "type": "string", "description": "Registered payload type" },
+        "schema_version": { "type": "string", "default": "1.0.0" },
+        "content": { "description": "The actual agent output" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "memory_refs": {
+      "type": "array",
+      "description": "References to ChromaDB documents consumed or produced",
+      "items": {
+        "type": "object",
+        "required": ["uri", "role"],
+        "properties": {
+          "uri": { "type": "string", "pattern": "^chromadb://" },
+          "role": { "type": "string", "enum": ["read", "write"] },
+          "relevance": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "running",
+        "success",
+        "partial",
+        "failed",
+        "blocked_hitl"
+      ]
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "message"],
+        "properties": {
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "recoverable": { "type": "boolean" },
+          "suggested_action": { "type": "string" }
+        }
+      }
+    },
+    "hitl": {
+      "type": "object",
+      "description": "Human-in-the-loop request, present only when status is blocked_hitl",
+      "properties": {
+        "reason": { "type": "string" },
+        "question": { "type": "string" },
+        "options": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "trace": {
+      "type": "array",
+      "description": "Optional debug trace for internal reasoning",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step": { "type": "string" },
+          "detail": { "type": "string" },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  }
+}

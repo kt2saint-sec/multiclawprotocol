@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+target/
+
+# Build
+dist/
+src-tauri/target/
+src-tauri/gen/
+
+# Environment
+.env
+.env.*
+*.key
+*.pem
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+
+# Tauri
+WixTools/

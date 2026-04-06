@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-surface-primary text-surface-accent font-sans antialiased;
+  }
+  .dark body {
+    @apply bg-dark-surface-primary text-gray-100;
+  }
+}
+
+@layer components {
+  .btn-buy {
+    @apply bg-btn-buy-light text-white font-semibold px-6 py-3 rounded-pill
+           transition-all duration-200 hover:opacity-90 active:scale-[0.98];
+  }
+  .dark .btn-buy {
+    @apply bg-btn-buy-dark;
+  }
+  .btn-browse {
+    @apply bg-btn-browse-light font-semibold px-6 py-3 rounded-pill
+           transition-all duration-200 hover:opacity-90 active:scale-[0.98];
+    color: #264855;
+  }
+  .dark .btn-browse {
+    @apply bg-btn-browse-dark;
+    color: #A6B8B8;
+  }
+  .btn-cart {
+    @apply bg-btn-cart-light text-white font-semibold px-6 py-3 rounded-pill
+           transition-all duration-200 hover:opacity-90 active:scale-[0.98];
+  }
+  .dark .btn-cart {
+    @apply bg-btn-cart-dark;
+  }
+}
