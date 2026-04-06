@@ -11,69 +11,56 @@ interface DepStatus {
 
 const INITIAL_DEPS: DepStatus[] = [
   {
-    name: "Hermes Agent",
-    description: "Agent runtime — required to run any pipeline",
-    installCmd: "pip install hermes-agent",
+    name: "ChromaDB",
+    description: "Vector database — agent memory and semantic search",
+    installCmd: "pip install chromadb sentence-transformers",
     status: "checking",
     critical: true,
-  },
-  {
-    name: "Ollama",
-    description: "Local LLM runtime — runs AI models on your GPU",
-    installCmd: "curl -fsSL https://ollama.com/install.sh | sh && ollama serve",
-    status: "checking",
-    critical: true,
-  },
-  {
-    name: "Qwen Model",
-    description:
-      "Default model — smallest functional agent model (430K context)",
-    installCmd: "ollama pull huihui_ai/qwen3.5-abliterated:9b-q8_0",
-    status: "checking",
-    critical: false,
   },
   {
     name: "Docker",
-    description:
-      "Container runtime — sandboxed agent execution (BUILDER agent)",
+    description: "Optional — sandboxed agent execution for BUILDER agent",
     installCmd: "curl -fsSL https://get.docker.com | sh",
     status: "checking",
     critical: false,
   },
   {
-    name: "ChromaDB",
-    description: "Vector database — agent memory with Universal I/O",
-    installCmd: "pip install chromadb sentence-transformers",
+    name: "Ollama (optional)",
+    description:
+      "Local model hosting — run AI models on your GPU. Not required if using cloud models only.",
+    installCmd: "curl -fsSL https://ollama.com/install.sh | sh && ollama serve",
     status: "checking",
-    critical: true,
+    critical: false,
   },
 ];
 
 async function checkDep(dep: DepStatus): Promise<DepStatus> {
   switch (dep.name) {
-    case "Hermes Agent": {
-      // Check if hermes binary is reachable by trying the version endpoint
-      // In Tauri desktop mode, this would use invoke('check_hermes')
-      // In browser mode, we can't check binaries — show instructions
+    case "ChromaDB": {
       try {
-        // Try to reach hermes MCP server if running
-        const resp = await fetch("http://localhost:8765/health", {
+        const resp = await fetch("http://localhost:8000/api/v1/heartbeat", {
           signal: AbortSignal.timeout(1500),
         });
-        if (resp.ok) return { ...dep, status: "installed", version: "running" };
+        if (resp.ok) return { ...dep, status: "installed", version: "server" };
       } catch {
-        /* hermes not running as server — expected for CLI mode */
+        /* not running as HTTP server */
       }
-      // Can't verify CLI binary from browser — show install instructions
-      return {
-        ...dep,
-        status: "missing",
-        installCmd: "pip install hermes-agent && hermes init",
-      };
+      return { ...dep, status: "missing" };
     }
 
-    case "Ollama": {
-      // Try Ollama API — works if ollama serve is running
+    case "Docker": {
+      try {
+        const resp = await fetch("http://localhost:2375/version", {
+          signal: AbortSignal.timeout(1500),
+        });
+        if (resp.ok) return { ...dep, status: "installed", version: "TCP" };
+      } catch {
+        /* Docker typically uses Unix socket, not TCP */
+      }
+      return { ...dep, status: "missing" };
+    }
+
+    case "Ollama (optional)": {
       try {
         const resp = await fetch("http://localhost:11434/api/version", {
           signal: AbortSignal.timeout(2000),
@@ -83,68 +70,9 @@ async function checkDep(dep: DepStatus): Promise<DepStatus> {
           return { ...dep, status: "installed", version: data.version };
         }
       } catch {
-        /* API not reachable — may be installed but service not started */
+        /* not running */
       }
-      // Can't confirm from browser if binary exists but service is stopped
-      // Show as missing with helpful install/start command
-      return {
-        ...dep,
-        status: "missing",
-        installCmd:
-          "curl -fsSL https://ollama.com/install.sh | sh && ollama serve",
-      };
-    }
-
-    case "Qwen 3.5 (430K context)": {
-      try {
-        const resp = await fetch("http://localhost:11434/api/tags", {
-          signal: AbortSignal.timeout(2000),
-        });
-        if (resp.ok) {
-          const data = await resp.json();
-          const models = (data.models || []) as Array<{ name: string }>;
-          const hasQwen = models.some(
-            (m) =>
-              m.name.includes("qwen3.5") ||
-              m.name.includes("qwen3") ||
-              m.name.includes("qwen"),
-          );
-          if (hasQwen) return { ...dep, status: "installed", version: "found" };
-          // Ollama running but no Qwen model
-          return { ...dep, status: "missing" };
-        }
-      } catch {
-        /* ollama not running — can't check models */
-      }
-      // If Ollama isn't running, we can't tell — show as missing
       return { ...dep, status: "missing" };
-    }
-
-    case "Docker": {
-      // Docker uses Unix socket — browser can't check it directly
-      try {
-        const resp = await fetch("http://localhost:2375/version", {
-          signal: AbortSignal.timeout(1500),
-        });
-        if (resp.ok) return { ...dep, status: "installed", version: "TCP" };
-      } catch {
-        /* expected — Docker uses Unix socket not TCP */
-      }
-      // Assume installed — Tauri desktop will verify via `docker info`
-      return { ...dep, status: "installed", version: "verify in terminal" };
-    }
-
-    case "ChromaDB": {
-      // OpenClaw uses PersistentClient (no HTTP server) — always "installed"
-      try {
-        const resp = await fetch("http://localhost:8000/api/v1/heartbeat", {
-          signal: AbortSignal.timeout(1500),
-        });
-        if (resp.ok) return { ...dep, status: "installed", version: "server" };
-      } catch {
-        /* expected — PersistentClient mode has no HTTP API */
-      }
-      return { ...dep, status: "installed", version: "PersistentClient" };
     }
 
     default:
@@ -170,11 +98,7 @@ export function FirstLaunchCheck({ onComplete }: FirstLaunchCheckProps) {
   }, []);
 
   const allInstalled = deps.every((d) => d.status === "installed");
-  const criticalMissing = deps.filter(
-    (d) => d.critical && d.status === "missing",
-  );
   const missingCount = deps.filter((d) => d.status === "missing").length;
-  const canLaunch = criticalMissing.length === 0;
 
   return (
     <div className="h-screen w-screen flex items-center justify-center bg-[#0F1117]">
@@ -187,7 +111,12 @@ export function FirstLaunchCheck({ onComplete }: FirstLaunchCheckProps) {
             className="h-12 mx-auto mb-3"
           />
           <p className="text-body-sm text-gray-500">
-            Checking system dependencies...
+            Checking optional dependencies...
+          </p>
+          <p className="text-[0.65rem] text-gray-600 mt-2">
+            Hermes Agent is bundled with MultiClawProtocol.
+            <br />
+            Everything below is optional.
           </p>
         </div>
 
@@ -244,56 +173,38 @@ export function FirstLaunchCheck({ onComplete }: FirstLaunchCheckProps) {
           ))}
         </div>
 
-        {/* Actions */}
+        {/* Actions — never blocks */}
         <div className="mt-6 flex items-center gap-3">
-          {allInstalled ? (
-            <button
-              onClick={onComplete}
-              className="flex-1 py-3 rounded-pill font-semibold text-body-sm text-white bg-[#166534] hover:bg-[#15803d] transition-colors"
-            >
-              All dependencies found — Launch MultiClawProtocol
-            </button>
-          ) : (
-            <>
-              <button
-                onClick={canLaunch ? onComplete : undefined}
-                disabled={!canLaunch && !checking}
-                className={`flex-1 py-3 rounded-pill font-semibold text-body-sm text-white transition-colors ${
-                  canLaunch
-                    ? "bg-[#1B3A6B] hover:bg-[#1E40AF]"
-                    : "bg-gray-700 cursor-not-allowed opacity-50"
-                }`}
-              >
-                {checking
-                  ? "Checking..."
-                  : canLaunch
-                    ? `Launch (${missingCount} optional missing)`
-                    : `Install ${criticalMissing.length} required dep${criticalMissing.length > 1 ? "s" : ""} first`}
-              </button>
-              <button
-                onClick={() => {
-                  setDeps(INITIAL_DEPS);
-                  setChecking(true);
-                  void (async () => {
-                    const results = await Promise.all(
-                      INITIAL_DEPS.map(checkDep),
-                    );
-                    setDeps(results);
-                    setChecking(false);
-                  })();
-                }}
-                className="px-4 py-3 rounded-pill text-body-sm text-gray-500 border border-gray-700 hover:text-white hover:border-gray-500 transition-colors"
-              >
-                Re-check
-              </button>
-            </>
-          )}
+          <button
+            onClick={onComplete}
+            className="flex-1 py-3 rounded-pill font-semibold text-body-sm text-white bg-[#166534] hover:bg-[#15803d] transition-colors"
+          >
+            {checking
+              ? "Checking..."
+              : allInstalled
+                ? "Launch MultiClawProtocol"
+                : `Launch MultiClawProtocol${missingCount > 0 ? ` (${missingCount} optional not found)` : ""}`}
+          </button>
+          <button
+            onClick={() => {
+              setDeps(INITIAL_DEPS);
+              setChecking(true);
+              void (async () => {
+                const results = await Promise.all(INITIAL_DEPS.map(checkDep));
+                setDeps(results);
+                setChecking(false);
+              })();
+            }}
+            className="px-4 py-3 rounded-pill text-body-sm text-gray-500 border border-gray-700 hover:text-white hover:border-gray-500 transition-colors"
+          >
+            Re-check
+          </button>
         </div>
 
         {/* Note */}
         <p className="text-center text-caption text-gray-600 mt-4">
-          Some checks require services to be running. Install missing
-          dependencies, then click Re-check.
+          All dependencies are optional. Install them later to enable local
+          models, sandboxed execution, and agent memory.
         </p>
       </div>
     </div>
