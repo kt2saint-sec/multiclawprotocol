@@ -2,9 +2,6 @@ mod commands;
 mod engine;
 
 use commands::execution::ExecutionManager;
-#[cfg(debug_assertions)]
-use tauri::Manager;
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -54,10 +51,6 @@ pub fn run() {
                 .build(),
         )
         .setup(|_app| {
-            #[cfg(debug_assertions)]
-            if let Some(window) = _app.get_webview_window("main") {
-                window.open_devtools();
-            }
             Ok(())
         })
         .run(tauri::generate_context!())
