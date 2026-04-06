@@ -122,18 +122,15 @@ export function mergeAndSort(entries: UnifiedLogEntry[]): UnifiedLogEntry[] {
   });
 }
 
-/** Fetch a log file via HTTP (works when files are served, or in dev) */
-export async function fetchLogFile(path: string): Promise<string> {
-  // In Tauri, use the fs plugin
-  if ("__TAURI_INTERNALS__" in window) {
-    try {
-      const { readTextFile } = await import("@tauri-apps/plugin-fs");
-      return await readTextFile(path);
-    } catch {
-      // Fall through to fetch
-    }
-  }
-
-  // In browser, try to read from a local API or return empty
+/**
+ * Fetch a log file content.
+ * In browser mode: returns empty (log files not accessible from browser).
+ * In Tauri desktop mode: wire up tauri-plugin-fs here when building the desktop app.
+ * Pipeline execution logs come from executionStore instead (always available).
+ */
+export async function fetchLogFile(_path: string): Promise<string> {
+  // Browser can't read local files. When running as Tauri desktop app,
+  // replace this with: invoke('read_log_file', { path: _path })
+  // via a Tauri command that reads the file server-side.
   return "";
 }

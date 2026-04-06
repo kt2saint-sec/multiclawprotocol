@@ -33,6 +33,7 @@ export function SignupPortal({ onAuthenticated }: SignupPortalProps) {
     // Use Supabase if configured, otherwise fall back to localStorage
     if (isSupabaseConfigured()) {
       try {
+        if (!supabase) throw new Error("Supabase not configured");
         if (mode === "signup") {
           const { error: signUpError } = await supabase.auth.signUp({
             email,
