@@ -1,3 +1,4 @@
+pub mod chromadb;
 pub mod cost_ledger;
 pub mod docker_runner;
 pub mod envelope;

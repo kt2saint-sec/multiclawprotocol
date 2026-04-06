@@ -12,6 +12,7 @@ import { SignupPortal } from "./components/auth/SignupPortal";
 import { ApiKeysPage } from "./components/settings/ApiKeysPage";
 import { NetworkGraph3D } from "./components/network/NetworkGraph3D";
 import { TerminalView } from "./components/terminal/TerminalView";
+import { ConnectorChat } from "./components/chat/ConnectorChat";
 import { LogViewerPage } from "./components/logs/LogViewerPage";
 import { FirstLaunchCheck } from "./components/setup/FirstLaunchCheck";
 import { HelpPage } from "./components/help/HelpPage";
@@ -41,7 +42,9 @@ export default function App() {
 
   const handleSignOut = useCallback(() => {
     localStorage.removeItem("mcp-auth");
+    localStorage.removeItem("mcp-setup-done");
     setAuthenticated(false);
+    setSetupDone(false);
   }, []);
 
   const handleSignIn = useCallback(() => {
@@ -126,8 +129,13 @@ export default function App() {
           )}
 
           {currentPage === "terminal" && (
-            <div className="flex-1">
-              <TerminalView />
+            <div className="flex-1 flex min-h-0">
+              <div className="w-1/2 flex-none h-full border-r border-gray-700/50">
+                <TerminalView />
+              </div>
+              <div className="w-1/2 flex-none h-full">
+                <ConnectorChat />
+              </div>
             </div>
           )}
 
