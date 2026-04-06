@@ -25,10 +25,25 @@ export function TopNav({
       <div className="flex items-center gap-4">
         <button
           onClick={() => onNavigate("canvas")}
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          className="flex items-center hover:opacity-80 transition-opacity"
         >
-          <span className="text-body-sm font-bold tracking-tight bg-gradient-to-r from-[#1B3A6B] to-[#7dd3fc] bg-clip-text text-transparent">
-            MultiClawProtocol
+          <span
+            className="text-body-lg font-black tracking-tight text-gray-300"
+            style={{ fontFamily: "'Impact', 'Arial Black', sans-serif" }}
+          >
+            MULTI
+          </span>
+          <span
+            className="text-body-lg font-black tracking-tight text-red-500"
+            style={{ fontFamily: "'Impact', 'Arial Black', sans-serif" }}
+          >
+            CLAW
+          </span>
+          <span
+            className="text-body-lg font-black tracking-tight text-gray-300"
+            style={{ fontFamily: "'Impact', 'Arial Black', sans-serif" }}
+          >
+            PROTOCOL
           </span>
         </button>
 

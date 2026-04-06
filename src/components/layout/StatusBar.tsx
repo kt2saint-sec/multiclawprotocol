@@ -46,7 +46,10 @@ export function StatusBar() {
             Loaded: {loadedModelNames}
           </span>
         )}
-        <span>{health.available_models.length} models</span>
+        <span>
+          {health.available_models.length} model
+          {health.available_models.length !== 1 ? "s" : ""} installed
+        </span>
       </div>
       <div className="flex items-center gap-4">
         <CostTicker />

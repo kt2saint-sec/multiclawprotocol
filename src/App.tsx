@@ -10,6 +10,7 @@ import { InspectorWrapper } from "./components/inspector/InspectorWrapper";
 import { ExecutionToolbar } from "./components/execution/ExecutionToolbar";
 import { SignupPortal } from "./components/auth/SignupPortal";
 import { ApiKeysPage } from "./components/settings/ApiKeysPage";
+import { NetworkGraph3D } from "./components/network/NetworkGraph3D";
 import { useExecutionEvents } from "./hooks/useExecutionEvents";
 import { useAgentRegistryStore } from "./stores/agentRegistryStore";
 import { DEMO_AGENTS } from "./data/demo-agents";
@@ -89,8 +90,8 @@ export default function App() {
           )}
 
           {currentPage === "network" && (
-            <div className="flex-1 flex items-center justify-center text-gray-500">
-              <p className="text-body-sm">3D Network — loading...</p>
+            <div className="flex-1">
+              <NetworkGraph3D />
             </div>
           )}
 

@@ -1,35 +1,41 @@
-import { useCallback } from 'react'
-import { useReactFlow } from '@xyflow/react'
-import type { AgentManifest } from '../types/agent'
+import { useCallback } from "react";
+import { useReactFlow } from "@xyflow/react";
+import type { AgentManifest } from "../types/agent";
 
 export function useAgentDragDrop() {
-  const { screenToFlowPosition, addNodes } = useReactFlow()
+  const { screenToFlowPosition, addNodes } = useReactFlow();
 
   const onDragOver = useCallback((event: React.DragEvent) => {
-    event.preventDefault()
-    event.dataTransfer.dropEffect = 'move'
-  }, [])
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+  }, []);
 
-  const onDrop = useCallback((event: React.DragEvent) => {
-    event.preventDefault()
-    const raw = event.dataTransfer.getData('application/anvilbus-agent')
-    if (!raw) return
+  const onDrop = useCallback(
+    (event: React.DragEvent) => {
+      event.preventDefault();
+      const raw = event.dataTransfer.getData("application/anvilbus-agent");
+      if (!raw) return;
 
-    const manifest: AgentManifest = JSON.parse(raw)
-    const position = screenToFlowPosition({ x: event.clientX, y: event.clientY })
+      const manifest: AgentManifest = JSON.parse(raw);
+      const position = screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
 
-    addNodes({
-      id: `${manifest.id}-${Date.now()}`,
-      type: 'agent',
-      position,
-      data: {
-        manifest,
-        status: 'idle',
-        outputPayloadType: manifest.schemas.payload_type,
-        inputAcceptTypes: Object.keys(manifest.schemas.input),
-      },
-    })
-  }, [screenToFlowPosition, addNodes])
+      addNodes({
+        id: `${manifest.id}-${Date.now()}`,
+        type: "agent",
+        position,
+        data: {
+          manifest,
+          status: "idle",
+          outputPayloadType: manifest.schemas.payload_type,
+          inputAcceptTypes: ["*"],
+        },
+      });
+    },
+    [screenToFlowPosition, addNodes],
+  );
 
-  return { onDragOver, onDrop }
+  return { onDragOver, onDrop };
 }
