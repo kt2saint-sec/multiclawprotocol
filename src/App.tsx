@@ -11,6 +11,7 @@ import { ExecutionToolbar } from "./components/execution/ExecutionToolbar";
 import { SignupPortal } from "./components/auth/SignupPortal";
 import { ApiKeysPage } from "./components/settings/ApiKeysPage";
 import { NetworkGraph3D } from "./components/network/NetworkGraph3D";
+import { TerminalView } from "./components/terminal/TerminalView";
 import { useExecutionEvents } from "./hooks/useExecutionEvents";
 import { useAgentRegistryStore } from "./stores/agentRegistryStore";
 import { DEMO_AGENTS } from "./data/demo-agents";
@@ -101,6 +102,12 @@ export default function App() {
           )}
 
           {currentPage === "settings" && <ApiKeysPage />}
+
+          {currentPage === "terminal" && (
+            <div className="flex-1">
+              <TerminalView />
+            </div>
+          )}
         </div>
       </ReactFlowProvider>
     </ThemeProvider>

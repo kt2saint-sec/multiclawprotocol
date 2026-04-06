@@ -69,6 +69,9 @@ export function PipelineCanvas() {
         edgeTypes={edgeTypes}
         defaultEdgeOptions={{ type: "typed" }}
         fitView
+        fitViewOptions={{ padding: 0.3, maxZoom: 1.5 }}
+        minZoom={0.1}
+        maxZoom={3}
         className="bg-surface-primary dark:bg-dark-surface-primary"
       >
         <Background
@@ -79,8 +82,11 @@ export function PipelineCanvas() {
           color="#33333320"
         />
         <MiniMap
+          style={{ width: 140, height: 90 }}
           className="!bg-surface-secondary dark:!bg-dark-surface-secondary !border-gray-200 dark:!border-gray-700"
-          maskColor="rgba(0,0,0,0.1)"
+          maskColor="rgba(0,0,0,0.2)"
+          pannable
+          zoomable
         />
         <Controls className="!bg-surface-primary dark:!bg-dark-surface-primary !border-gray-200 dark:!border-gray-700 !shadow-node" />
       </ReactFlow>

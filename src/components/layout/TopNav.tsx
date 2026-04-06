@@ -11,6 +11,7 @@ interface TopNavProps {
 const PAGES = [
   { id: "canvas", label: "Pipeline" },
   { id: "network", label: "3D Map" },
+  { id: "terminal", label: "Terminal" },
   { id: "settings", label: "Settings" },
 ];
 
