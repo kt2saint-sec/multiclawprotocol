@@ -4,7 +4,6 @@ import {
   Background,
   MiniMap,
   Controls,
-  Panel,
   type OnConnect,
   type Connection,
 } from "@xyflow/react";
@@ -16,7 +15,6 @@ import { HitlGateNode } from "./HitlGateNode";
 import { TypedEdge } from "./TypedEdge";
 import { useConnectionValidator } from "../../hooks/useConnectionValidator";
 import { useAgentDragDrop } from "../../hooks/useAgentDragDrop";
-import { ExecutionToolbar } from "../execution/ExecutionToolbar";
 import { ExecutionOverlay } from "../execution/ExecutionOverlay";
 import { HitlModal } from "../execution/HitlModal";
 
@@ -85,9 +83,6 @@ export function PipelineCanvas() {
           maskColor="rgba(0,0,0,0.1)"
         />
         <Controls className="!bg-surface-primary dark:!bg-dark-surface-primary !border-gray-200 dark:!border-gray-700 !shadow-node" />
-        <Panel position="top-right">
-          <ExecutionToolbar />
-        </Panel>
       </ReactFlow>
     </>
   );

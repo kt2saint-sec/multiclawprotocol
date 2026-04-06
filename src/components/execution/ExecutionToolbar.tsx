@@ -96,58 +96,51 @@ export function ExecutionToolbar() {
 
   const statusInfo = STATUS_CONFIG[status];
 
+  const btnBase =
+    "w-20 py-1.5 text-caption font-medium rounded-pill text-center transition-all disabled:opacity-30 disabled:cursor-not-allowed";
+
   return (
-    <div className="flex items-center gap-2">
-      {/* Run button */}
+    <div className="flex items-center gap-1.5">
       <button
         onClick={handleRun}
         disabled={!canRun || nodes.length === 0}
-        className="btn-cart text-caption px-3 py-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+        className={`${btnBase} bg-[#1B3A6B] text-white hover:bg-[#1E40AF]`}
         title={
           nodes.length === 0 ? "Add agents to the canvas first" : "Run pipeline"
         }
       >
-        {status === "running" ? "⟳" : "▶"} Run
+        {status === "running" ? "⟳ Run" : "▶ Run"}
       </button>
 
-      {/* Pause button */}
-      <button
-        onClick={handlePause}
-        disabled={!canPause}
-        className="px-3 py-1.5 text-caption rounded-pill border border-gray-300 dark:border-gray-600
-          hover:bg-amber-50 dark:hover:bg-amber-900/20 disabled:opacity-30 disabled:cursor-not-allowed
-          transition-colors"
-        title="Pause execution"
-      >
-        ⏸ Pause
-      </button>
-
-      {/* Resume button */}
-      {status === "paused" && (
+      {status === "paused" ? (
         <button
           onClick={handleResume}
-          className="px-3 py-1.5 text-caption rounded-pill border border-green-400 dark:border-green-600
-            hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
+          className={`${btnBase} border border-[#166534] text-[#4ade80] hover:bg-[#166534]/20`}
           title="Resume execution"
         >
           ▶ Resume
         </button>
+      ) : (
+        <button
+          onClick={handlePause}
+          disabled={!canPause}
+          className={`${btnBase} border border-gray-600 text-gray-400 hover:bg-gray-800`}
+          title="Pause execution"
+        >
+          ⏸ Pause
+        </button>
       )}
 
-      {/* Stop button */}
       <button
         onClick={handleStop}
         disabled={!canStop}
-        className="px-3 py-1.5 text-caption rounded-pill border border-red-300 dark:border-red-600
-          hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-30 disabled:cursor-not-allowed
-          transition-colors"
+        className={`${btnBase} border border-gray-600 text-gray-400 hover:border-red-500 hover:text-red-400`}
         title="Stop execution"
       >
         ◼ Stop
       </button>
 
-      {/* Status indicator */}
-      <span className={`text-caption ${statusInfo.color} ml-2`}>
+      <span className={`text-caption ${statusInfo.color} ml-1`}>
         {statusInfo.label}
       </span>
     </div>

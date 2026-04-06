@@ -223,6 +223,34 @@ body {
   color: #1d1d1f;
 }
 
+/* ── React Flow dark mode overrides ── */
+.dark .react-flow__controls {
+  background: #1a1c24;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+.dark .react-flow__controls button {
+  background: #1a1c24;
+  color: #9ca3af;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+.dark .react-flow__controls button:hover {
+  background: #252830;
+  color: #e5e5e5;
+}
+.dark .react-flow__controls button svg {
+  fill: currentColor;
+}
+.dark .react-flow__minimap {
+  background: #1a1c24 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px;
+}
+.react-flow__attribution {
+  display: none !important;
+}
+
 /* ── Utility classes ── */
 .text-body {
   font-size: var(--text-body);
